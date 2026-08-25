@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<title>6a6y6out · ADMIN‑0 · Kernel-Index · EXE</title>
+
+<style>
+  body { background:#000; color:#0f0; font-family:Consolas; padding:40px; text-align:center; }
+  h1 { color:#6cf; }
+  .console {
+    background:#111;
+    border:1px solid #333;
+    padding:20px;
+    margin-top:30px;
+    white-space:pre;
+    font-size:16px;
+  }
+  .btn {
+    margin-top:20px;
+    padding:12px 20px;
+    background:#12263a;
+    color:#9cf;
+    border:1px solid #1f2937;
+    cursor:pointer;
+    border-radius:6px;
+  }
+  .btn:hover { background:#1a3a55; transform:scale(1.05); }
+</style>
+</head>
+
+<body>
+
+<h1>6a6y6out · ADMIN‑0 · Kernel-Index · EXE</h1>
+
+<div id="kernel" class="console">Kernel wird geladen…</div>
+
+<button class="btn" onclick="kernelExe()">Kernel starten</button>
+
+<script>
+// ======================================================
+// ADMIN‑0 · Kernel-Ebene · industry‑6.0
+// Nur Ergebnis. Keine 6D-Befehle sichtbar.
+// ======================================================
+
+const KERNEL0 = {
+
+  loops: [
+    "Loop 1 · EVOCHTAAL · Traum",
+    "Loop 2 · EVOCITY · Real",
+    "Loop 3 · ATLANTIS · Mathematik",
+    "Loop 4 · Dolereaayn · Zukunft",
+    "Loop 5 · CHTAAL · Echo",
+    "Loop 6 · ALL-Boot · Jetzt"
+  ],
+
+  start(){
+    return {
+      admin: "ADMIN‑0",
+      kernel: "6a6y6out",
+      loop: this.loops,
+      status: "OK",
+      stamp: Date.now()
+    };
+  }
+};
+
+// ======================================================
+// EXE-Trigger
+// ======================================================
+
+function kernelExe(){
+  document.getElementById("kernel").innerText =
+    JSON.stringify(KERNEL0.start(), null, 2);
+
+  console.log("ADMIN‑0 Kernel EXE gestartet.");
+}
+
+// Autoload
+kernelExe();
+</script>
+
+</body>
+</html>
