@@ -1,0 +1,18 @@
+OI‑NC9×9.room
+ ├─ OI (Orbit‑Input‑Spiegel)
+ │    3 ↔ 9
+ │    ↗ ↘
+ │
+ ├─ NC (Neutral‑Corridor)
+ │    ◎ / ◉
+ │    neutralisierte Achse
+ │
+ ├─ 9×9 (GEN‑Expansion)
+ │    81 ◆  → Weltfeld
+ │    27 ▣ → Faktor
+ │    △    → Dimension
+ │
+ └─ room (Rauminstanz)
+      Echo‑Felder
+      Einstieg 3 ↺
+      Ankunft / EVO / Clock‑Time
