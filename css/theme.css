@@ -1,1 +1,22 @@
+:root {
+  --bg: #0b0c10;
+  --fg: #e8e8e8;
+  --dim: #888;
+
+  --o2: #7ce0a8;
+  --co2: #ff5a7a;
+  --h2o: #7ab7ff;
+  --atom: #e0d07c;
+
+  --mana: #c87cff;
+
+  --bg2: #1a1c22;
+  --co2-dim: rgba(255,90,122,0.4);
+}
+
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: "Inter", sans-serif;
+}
 
