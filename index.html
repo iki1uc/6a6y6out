@@ -1,1056 +1,1689 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="de">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>◈ ATMEN · Das Erwachen · iki1uc</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>◈ AMIGA NEON GEISTER · DIRECTOR'S CUT</title>
 <style>
-  *{margin:0;padding:0;box-sizing:border-box;}
   :root{
-    --bg:#02060a; --bg2:#06101c; --bg3:#0c1828;
-    --fg:#c8d8e8; --dim:#5a7288; --dim2:#2a3644;
-    --o2:#7ce0a8; --co2:#ffcc44; --h2o:#5fc8ff; --atom:#b388ff;
-    --mana:#ff66c8; --aura:#ffd93d; --zen:#8cf0d0;
-    --ok:#7ce0a8; --warn:#ffcc44; --err:#ff5a7a;
-    --line:rgba(120,200,180,0.10);
-    --line2:rgba(120,200,180,0.05);
-    --mono:'Consolas','Courier New',monospace;
-    --serif:'Yu Mincho','Hiragino Mincho ProN',serif;
+    --amber:#ff8a2a; --green:#39ff88; --matrix:#00ff6a;
+    --magenta:#ff3ea5; --cyan:#5cf0ff; --violet:#b388ff;
+    --text:#e8fff4; --muted:#6a8e94;
   }
-  html,body{height:100%;overflow:hidden;}
+  *{box-sizing:border-box;}
+  html,body{height:100%;margin:0;overflow:hidden;background:#000;}
   body{
-    background:#000;color:var(--fg);
-    font-family:var(--mono);font-size:13px;
+    color:var(--text);font-family:"Courier New",ui-monospace,monospace;
+    letter-spacing:.04em;cursor:crosshair;
+  }
+  #stage{position:fixed;inset:0;width:100vw;height:100vh;display:block;background:#02040a;}
+
+  .crt{
+    position:fixed;inset:0;pointer-events:none;z-index:5;
+    background:
+      repeating-linear-gradient(to bottom,
+        rgba(0,0,0,0) 0px, rgba(0,0,0,0) 2px,
+        rgba(0,0,0,.20) 3px, rgba(0,0,0,0) 4px),
+      radial-gradient(circle at 50% 50%,
+        rgba(0,0,0,0) 30%, rgba(0,0,0,.35) 75%, rgba(0,0,0,.8) 100%);
+    mix-blend-mode:multiply;
+  }
+  .crt::after{
+    content:"";position:absolute;inset:0;
+    background:
+      radial-gradient(circle at 50% 40%, rgba(255,138,42,.06), transparent 55%),
+      radial-gradient(circle at 20% 80%, rgba(92,240,255,.05), transparent 60%);
+    mix-blend-mode:screen;
+  }
+  .glass{
+    position:fixed;inset:0;pointer-events:none;z-index:6;
+    background:linear-gradient(115deg,
+      rgba(255,255,255,0) 42%, rgba(255,255,255,.04) 47%,
+      rgba(255,255,255,0) 53%);
+    mix-blend-mode:screen;
+  }
+
+  /* ==== AMIGA KICKSTART BOOT ==== */
+  #kickstart{
+    position:fixed;inset:0;z-index:100;background:#000;
     display:flex;align-items:center;justify-content:center;
+    transition:opacity .9s ease;
   }
-  #game{
-    width:100vw;height:100vh;max-width:1200px;max-height:800px;
-    background:radial-gradient(ellipse at 50% 40%,
-      #08121e 0%, #040a12 60%, #000 100%);
-    position:relative;overflow:hidden;
-    display:flex;flex-direction:column;
+  #kickstart.hidden{opacity:0;pointer-events:none;}
+  .ks-inner{
+    text-align:center;font-family:"Courier New",monospace;
   }
-  #game::before{
-    content:'';position:absolute;inset:0;pointer-events:none;
-    background:radial-gradient(circle at 50% 50%,
-      transparent 30%, rgba(0,0,0,0.4) 100%);
+  .ks-hand{
+    width:180px;height:180px;margin:0 auto 30px;
+    display:block;
   }
-  
-  /* TOPBAR */
-  #top{
-    height:40px;padding:0 18px;
-    display:flex;align-items:center;gap:14px;
-    border-bottom:1px solid var(--line);
-    background:rgba(2,6,10,0.7);
-    backdrop-filter:blur(6px);
-    font-size:11px;letter-spacing:2px;z-index:10;
+  .ks-text{
+    color:#d8f0e8;font-size:14px;letter-spacing:.35em;
+    margin-bottom:20px;text-shadow:0 0 12px rgba(0,255,106,.5);
   }
-  #top .logo{
-    color:var(--o2);font-family:var(--serif);
-    font-weight:bold;letter-spacing:3px;
-    text-shadow:0 0 10px rgba(124,224,168,0.6);
+  .ks-progress{
+    width:420px;height:14px;margin:0 auto;
+    border:1px solid #39ff88;background:#050a0c;position:relative;
+    box-shadow:0 0 20px rgba(0,255,106,.3);
   }
-  #top .kammer{
-    color:var(--co2);font-size:10px;
-    padding:2px 8px;border:1px solid rgba(255,204,68,0.3);
-    border-radius:3px;letter-spacing:2px;
+  .ks-progress i{
+    display:block;height:100%;width:0%;
+    background:repeating-linear-gradient(90deg,#39ff88 0 8px,#00ff6a 8px 16px);
+    box-shadow:0 0 12px #39ff88;
+    transition:width .1s linear;
   }
-  #top .stats{margin-left:auto;display:flex;gap:14px;color:var(--dim);}
-  #top .stats b{color:var(--h2o);font-weight:bold;}
-  
-  /* STAGE */
-  #stage{
-    flex:1;position:relative;
-    display:flex;flex-direction:column;
-    align-items:center;justify-content:center;
-    padding:20px;overflow:hidden;
+  .ks-status{
+    margin-top:18px;font-size:10px;color:var(--muted);
+    letter-spacing:.35em;
   }
-  
-  /* TEXT */
-  .narr{
-    max-width:640px;text-align:center;
-    font-family:var(--serif);font-style:italic;
-    font-size:15px;line-height:1.9;color:#b8d8c8;
-    animation:fadeIn 1.2s ease-out;
+
+  /* ==== HUD ==== */
+  .hud{
+    position:fixed;inset:0;pointer-events:none;z-index:10;
+    display:grid;grid-template-rows:auto 1fr auto;padding:18px 22px;
   }
-  .narr .hl{color:var(--co2);font-style:normal;font-weight:bold;}
-  .narr .hl-o2{color:var(--o2);font-style:normal;font-weight:bold;}
-  .narr .hl-h2o{color:var(--h2o);font-style:normal;font-weight:bold;}
-  .narr .hl-atom{color:var(--atom);font-style:normal;font-weight:bold;}
-  .narr .hl-err{color:var(--err);font-style:normal;font-weight:bold;}
-  
-  @keyframes fadeIn{
-    from{opacity:0;transform:translateY(8px);}
-    to{opacity:1;transform:none;}
+  .hud-top{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;}
+  .tag{
+    font-size:11px;letter-spacing:.25em;color:var(--amber);
+    text-shadow:0 0 8px rgba(255,138,42,.9),0 0 20px rgba(255,138,42,.4);
+    animation:flicker 4.5s infinite;
   }
-  
-  /* BUTTONS */
-  .btnrow{
-    display:flex;gap:10px;flex-wrap:wrap;
-    justify-content:center;margin-top:26px;
-    animation:fadeIn 1.4s ease-out;
+  @keyframes flicker{
+    0%,95%,100%{opacity:1;}
+    96%{opacity:.35;}97%{opacity:.9;}98%{opacity:.5;}99%{opacity:1;}
   }
-  .btn{
-    padding:12px 22px;background:var(--bg3);
-    border:1px solid var(--line);color:var(--fg);
-    font-family:var(--mono);font-size:11px;
-    letter-spacing:2px;cursor:pointer;
-    border-radius:4px;transition:.18s;
-    text-transform:uppercase;min-width:120px;
+  .tag small{display:block;color:var(--muted);font-size:9px;letter-spacing:.35em;margin-top:3px;text-shadow:none;}
+  .status{
+    display:flex;flex-direction:column;align-items:flex-end;gap:6px;
+    font-size:10px;color:var(--muted);letter-spacing:.2em;
   }
-  .btn:hover{
-    border-color:var(--o2);background:rgba(124,224,168,0.08);
-    color:var(--o2);box-shadow:0 0 16px rgba(124,224,168,0.25);
-    transform:translateY(-1px);
+  .led{display:inline-flex;align-items:center;gap:7px;}
+  .led::before{
+    content:"";width:7px;height:7px;border-radius:50%;
+    background:var(--matrix);
+    box-shadow:0 0 8px var(--matrix),0 0 18px rgba(0,255,106,.5);
+    animation:pulse 2.4s ease-in-out infinite;
   }
-  .btn:active{transform:scale(0.97);}
-  .btn.gold{border-color:rgba(255,204,68,0.4);color:var(--co2);}
-  .btn.gold:hover{background:rgba(255,204,68,0.12);color:#fff;
-    box-shadow:0 0 16px rgba(255,204,68,0.3);}
-  .btn.violet{border-color:rgba(179,136,255,0.4);color:var(--atom);}
-  .btn.violet:hover{background:rgba(179,136,255,0.12);color:#fff;
-    box-shadow:0 0 16px rgba(179,136,255,0.3);}
-  .btn.err{border-color:rgba(255,90,122,0.4);color:var(--err);}
-  .btn.err:hover{background:rgba(255,90,122,0.12);color:#fff;}
-  
-  /* BREATH CORE */
-  #breathWrap{
-    position:relative;width:260px;height:260px;
-    display:flex;align-items:center;justify-content:center;
+  @keyframes pulse{0%,100%{opacity:1;transform:scale(1);}50%{opacity:.55;transform:scale(.75);}}
+
+  /* ==== COPPER BARS (side edges) ==== */
+  .copper-left,.copper-right{
+    position:fixed;top:0;bottom:0;width:8px;z-index:7;
+    pointer-events:none;opacity:.85;
   }
-  #breathCore{
-    position:absolute;top:50%;left:50%;
-    transform:translate(-50%,-50%);
-    width:100px;height:100px;border-radius:50%;
-    background:radial-gradient(circle at 40% 35%,
-      #ffffff 0%,#b8ffd8 12%,#7ce0a8 35%,#5fc8ff 65%,#1a0838 100%);
-    box-shadow:
-      0 0 40px rgba(124,224,168,0.7),
-      0 0 90px rgba(95,200,255,0.5),
-      inset 0 0 30px rgba(255,255,255,0.35);
-    transition:transform .15s;
+  .copper-left{left:0;}
+  .copper-right{right:0;transform:scaleX(-1);}
+
+  /* ==== TITLE CARD ==== */
+  .titlecard{
+    position:fixed;inset:0;z-index:50;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    background:radial-gradient(circle at 50% 45%,
+      rgba(255,138,42,.08) 0%,rgba(0,0,0,.85) 55%,rgba(0,0,0,.98) 100%);
+    text-align:center;transition:opacity .9s ease, transform .9s ease;
   }
-  #breathRing{
-    position:absolute;inset:0;
-    border:1px solid rgba(124,224,168,0.2);
-    border-radius:50%;
-    transition:all .2s;
+  .titlecard.hidden{opacity:0;transform:scale(1.06);pointer-events:none;}
+  .titlecard .kicker{
+    color:var(--amber);letter-spacing:.5em;font-size:11px;
+    text-shadow:0 0 12px var(--amber);margin-bottom:22px;
   }
-  #breathRing.active{
-    border-color:var(--o2);
-    box-shadow:0 0 30px rgba(124,224,168,0.6);
+  .titlecard h1{
+    margin:0;font-size:clamp(28px,6.5vw,80px);
+    letter-spacing:.22em;font-weight:900;
+    background:linear-gradient(180deg,#fff 0%,#ffb347 55%,#ff5a1f 100%);
+    -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+    filter:drop-shadow(0 0 24px rgba(255,138,42,.65));
   }
-  #breathGlyph{
-    position:absolute;top:50%;left:50%;
-    transform:translate(-50%,-50%);
-    font-size:30px;font-weight:bold;color:#fff;
-    text-shadow:0 0 16px rgba(255,255,255,0.9),
-      0 0 32px rgba(124,224,168,0.8);
-    font-family:var(--serif);z-index:2;
+  .titlecard h2{
+    margin:14px 0 0;font-size:clamp(12px,1.7vw,18px);
+    letter-spacing:.65em;color:var(--matrix);
+    text-shadow:0 0 12px var(--matrix),0 0 30px rgba(0,255,106,.35);
+    font-weight:400;
   }
-  #breathWord{
-    position:absolute;bottom:-30px;left:50%;
-    transform:translateX(-50%);
-    font-family:var(--serif);letter-spacing:6px;
-    font-size:14px;color:var(--o2);
-    text-shadow:0 0 10px var(--o2);
-    text-transform:uppercase;
+  .titlecard p{
+    margin:38px 0 0;max-width:680px;
+    color:#a7c8c2;font-size:13px;line-height:1.85;letter-spacing:.06em;
+    padding:0 20px;
   }
-  
-  /* WELCOME CARDS */
-  .welcome-grid{
-    display:grid;grid-template-columns:repeat(4,1fr);
-    gap:14px;max-width:600px;margin:20px auto 0;
-    animation:fadeIn 1s ease-out;
+  .titlecard p em{color:var(--amber);font-style:normal;}
+  .enter{
+    margin-top:44px;padding:15px 38px;font-size:12px;letter-spacing:.32em;
+    border:1px solid var(--amber);color:var(--amber);background:transparent;
+    cursor:pointer;text-transform:uppercase;font-family:inherit;
+    box-shadow:0 0 20px rgba(255,138,42,.22),inset 0 0 20px rgba(255,138,42,.06);
+    transition:.35s;pointer-events:auto;position:relative;
   }
-  .wcard{
-    padding:20px 10px;text-align:center;cursor:pointer;
-    background:var(--bg2);border:2px solid var(--line2);
-    border-radius:10px;transition:.25s;
+  .enter:hover{
+    background:rgba(255,138,42,.12);
+    box-shadow:0 0 34px rgba(255,138,42,.55),inset 0 0 24px rgba(255,138,42,.15);
+    letter-spacing:.44em;
   }
-  .wcard:hover{transform:translateY(-4px);}
-  .wcard .dot{font-size:34px;display:block;margin-bottom:8px;}
-  .wcard .nm{
-    font-family:var(--serif);letter-spacing:2px;
-    font-size:12px;font-weight:bold;color:var(--dim);
+  .subline{margin-top:30px;font-size:9px;color:#3d5a5e;letter-spacing:.4em;}
+
+  /* ==== CONTROLS ==== */
+  .controls{
+    pointer-events:auto;display:flex;gap:8px;flex-wrap:wrap;align-items:center;
+    font-size:10px;letter-spacing:.18em;
   }
-  .wcard.green:hover{border-color:#7ce0a8;box-shadow:0 0 24px rgba(124,224,168,0.4);}
-  .wcard.yellow:hover{border-color:#ffcc44;box-shadow:0 0 24px rgba(255,204,68,0.4);}
-  .wcard.red:hover{border-color:#ff5a7a;box-shadow:0 0 24px rgba(255,90,122,0.4);}
-  .wcard.blue:hover{border-color:#5fc8ff;box-shadow:0 0 24px rgba(95,200,255,0.4);}
-  .wcard.picked{border-color:var(--co2);background:rgba(255,204,68,0.1);}
-  
-  /* LÄUFER GRID */
-  #laufGrid{
-    display:grid;grid-template-columns:repeat(10,1fr);
-    gap:5px;max-width:480px;width:100%;
-    margin:20px auto 0;
-    animation:fadeIn 1s ease-out;
+  .controls button{
+    background:rgba(6,14,22,.65);
+    border:1px solid rgba(255,138,42,.35);
+    color:var(--amber);padding:9px 13px;
+    font:inherit;font-size:10px;letter-spacing:.22em;
+    cursor:pointer;text-transform:uppercase;
+    backdrop-filter:blur(6px);transition:.22s;
   }
-  .lcell{
-    aspect-ratio:1;background:rgba(20,28,40,0.6);
-    border:1px solid var(--line2);
-    border-radius:3px;cursor:pointer;
-    transition:.2s;display:flex;align-items:center;
-    justify-content:center;font-size:8px;
-    color:var(--dim2);
+  .controls button:hover,.controls button.on{
+    background:rgba(255,138,42,.16);border-color:var(--amber);
+    color:#fff;box-shadow:0 0 16px rgba(255,138,42,.4);
   }
-  .lcell:hover{border-color:var(--h2o);background:rgba(95,200,255,0.1);}
-  .lcell.checked{background:rgba(124,224,168,0.1);color:var(--o2);}
-  .lcell.miss{background:rgba(255,90,122,0.1);color:var(--err);}
-  .lcell.user{
-    background:rgba(255,204,68,0.3) !important;
-    color:#fff !important;font-weight:bold;
-    box-shadow:inset 0 0 12px rgba(255,204,68,0.6),
-      0 0 18px rgba(255,204,68,0.5);
-    animation:userPulse 0.8s ease-in-out infinite;
+  .meter{display:flex;gap:10px;align-items:center;color:var(--muted);font-size:9px;letter-spacing:.25em;}
+  .meter .bar{
+    width:70px;height:4px;background:rgba(255,138,42,.12);
+    border:1px solid rgba(255,138,42,.3);position:relative;overflow:hidden;
   }
-  @keyframes userPulse{
-    0%,100%{box-shadow:inset 0 0 12px rgba(255,204,68,0.6);}
-    50%{box-shadow:inset 0 0 18px rgba(255,204,68,0.9),
-      0 0 24px rgba(255,204,68,0.7);}
+  .meter .bar i{
+    display:block;height:100%;width:0%;
+    background:linear-gradient(90deg,var(--amber),#fff2cc);
+    box-shadow:0 0 10px var(--amber);transition:width .12s linear;
   }
-  
-  /* PACT */
-  .pact{
-    max-width:520px;padding:30px 34px;
-    background:linear-gradient(135deg,#1a0830,#2a0f4a);
-    border:2px solid var(--co2);border-radius:8px;
-    box-shadow:0 0 60px rgba(255,204,68,0.3),
-      inset 0 0 40px rgba(179,136,255,0.1);
-    animation:fadeIn 1.2s ease-out;
-    position:relative;
+
+  .legend{
+    position:fixed;left:22px;bottom:78px;z-index:10;
+    font-size:9.5px;letter-spacing:.14em;color:#5c8086;
+    line-height:1.75;pointer-events:none;
+    text-shadow:0 0 8px rgba(0,0,0,.9);max-width:260px;
   }
-  .pact::before,.pact::after{
-    content:'';position:absolute;left:20px;right:20px;
-    height:1px;background:linear-gradient(90deg,
-      transparent,var(--co2),transparent);
+  .legend b{color:var(--amber);font-weight:400;letter-spacing:.28em;}
+  .legend .row{display:flex;gap:10px;align-items:center;}
+  .legend .dot{width:6px;height:6px;border-radius:50%;}
+
+  .narration{
+    position:fixed;left:50%;bottom:112px;transform:translateX(-50%);
+    z-index:10;pointer-events:none;text-align:center;
+    max-width:min(760px,86vw);
+    font-size:13px;line-height:1.75;letter-spacing:.06em;
+    color:#cfe8dd;text-shadow:0 0 10px rgba(0,0,0,.9);
+    opacity:0;transition:opacity .8s;
   }
-  .pact::before{top:14px;}
-  .pact::after{bottom:14px;}
-  .pact h4{
-    font-family:var(--serif);text-align:center;
-    color:var(--co2);letter-spacing:5px;
-    font-size:15px;margin-bottom:18px;
-    text-shadow:0 0 12px var(--co2);
+  .narration.show{opacity:1;}
+  .narration b{
+    color:var(--amber);font-weight:400;letter-spacing:.28em;
+    font-size:10px;display:block;margin-bottom:8px;
   }
-  .pact p{
-    font-family:var(--serif);font-style:italic;
-    font-size:14px;line-height:1.9;color:#e0d0f0;
-    text-align:center;margin-bottom:10px;
+
+  /* ==== MOD TRACKER SPECTRUM ==== */
+  #tracker{
+    position:fixed;bottom:0;left:0;right:0;height:44px;z-index:8;
+    pointer-events:none;opacity:.75;
   }
-  .pact .priceless{
-    text-align:center;font-family:var(--serif);
-    color:var(--co2);letter-spacing:4px;
-    font-size:12px;margin-top:18px;
-    text-shadow:0 0 8px var(--co2);
-  }
-  
-  /* BALANCE */
-  .balance-grid{
-    display:grid;grid-template-columns:repeat(4,1fr);
-    gap:14px;max-width:640px;width:100%;
-    margin:20px auto 0;
-  }
-  .bcol{text-align:center;}
-  .bcol .nm{
-    font-family:var(--serif);letter-spacing:2px;
-    font-size:11px;margin-bottom:8px;
-  }
-  .bcol.o2 .nm{color:var(--o2);}
-  .bcol.co2 .nm{color:var(--co2);}
-  .bcol.h2o .nm{color:var(--h2o);}
-  .bcol.atom .nm{color:var(--atom);}
-  .bcol .val{
-    font-size:22px;font-weight:bold;font-family:var(--mono);
-    margin-bottom:8px;
-  }
-  .bcol.o2 .val{color:var(--o2);text-shadow:0 0 10px var(--o2);}
-  .bcol.co2 .val{color:var(--co2);text-shadow:0 0 10px var(--co2);}
-  .bcol.h2o .val{color:var(--h2o);text-shadow:0 0 10px var(--h2o);}
-  .bcol.atom .val{color:var(--atom);text-shadow:0 0 10px var(--atom);}
-  .bbar{
-    height:8px;background:var(--bg3);
-    border-radius:4px;overflow:hidden;
-  }
-  .bbar .f{height:100%;transition:width .4s;}
-  .bcol.o2 .bbar .f{background:linear-gradient(90deg,#1a3a2a,var(--o2));}
-  .bcol.co2 .bbar .f{background:linear-gradient(90deg,#3a2a0a,var(--co2));}
-  .bcol.h2o .bbar .f{background:linear-gradient(90deg,#0a2a3a,var(--h2o));}
-  .bcol.atom .bbar .f{background:linear-gradient(90deg,#2a1a3a,var(--atom));}
-  .bcol .btn-small{
-    margin-top:8px;font-size:14px;padding:4px 10px;
-    background:var(--bg3);border:1px solid var(--line);
-    color:var(--fg);border-radius:3px;cursor:pointer;
-    font-family:var(--mono);transition:.15s;
-  }
-  .bcol .btn-small:hover{border-color:currentColor;}
-  
-  /* BOOT */
-  #boot{
-    position:absolute;inset:0;background:#000;
-    display:flex;flex-direction:column;
-    align-items:center;justify-content:center;
-    gap:16px;z-index:1000;
-    font-family:var(--mono);color:var(--o2);
-    letter-spacing:2px;font-size:12px;
-    transition:opacity .8s;
-  }
-  #boot.done{opacity:0;pointer-events:none;}
-  #boot .logo{
-    font-size:42px;font-family:var(--serif);
-    letter-spacing:14px;font-weight:bold;
-    color:var(--o2);
-    text-shadow:0 0 30px rgba(124,224,168,0.8),
-      0 0 60px rgba(95,200,255,0.5);
-    animation:logoBreathe 4s ease-in-out infinite;
-  }
-  @keyframes logoBreathe{
-    0%,100%{transform:scale(1);filter:brightness(1);}
-    50%{transform:scale(1.04);filter:brightness(1.4);}
-  }
-  #boot .sub{
-    color:var(--atom);font-family:var(--serif);
-    font-size:11px;letter-spacing:6px;
-  }
-  #boot .line{
-    font-size:11px;color:var(--dim);
-    letter-spacing:1px;
-  }
-  #boot .line b{color:var(--co2);}
-  #boot .hint{
-    color:var(--co2);font-family:var(--serif);
-    font-size:13px;letter-spacing:3px;
-    animation:fadeIn 2s ease-out;
-    margin-top:20px;text-shadow:0 0 10px var(--co2);
-  }
-  
-  /* EPILOG */
-  .epilog{
-    max-width:640px;text-align:center;
-    font-family:var(--serif);line-height:2;
-    font-size:16px;color:#c8e0d8;
-    animation:fadeIn 1.5s ease-out;
-  }
-  .epilog h2{
-    font-size:26px;letter-spacing:6px;
-    color:var(--co2);margin-bottom:24px;
-    text-shadow:0 0 20px var(--co2);
-  }
-  .epilog .score{
-    display:inline-block;
-    padding:6px 18px;margin:14px 4px;
-    border:1px solid var(--line);
-    border-radius:4px;font-family:var(--mono);
-    font-size:12px;letter-spacing:2px;
-  }
-  .epilog .score b{color:var(--o2);}
-  .epilog .final{
-    margin-top:30px;font-family:var(--serif);
-    letter-spacing:3px;color:var(--atom);
-    font-size:14px;
-  }
-  
-  @media (max-width:700px){
-    .narr{font-size:13px;}
-    .welcome-grid{grid-template-columns:1fr 1fr;}
-    .balance-grid{grid-template-columns:1fr 1fr;}
-    #boot .logo{font-size:30px;letter-spacing:8px;}
+  #tracker canvas{width:100%;height:100%;display:block;}
+
+  @media(max-width:700px){
+    .hud{padding:12px;}
+    .titlecard p{font-size:11.5px;}
+    .legend{display:none;}
+    .narration{bottom:92px;font-size:11.5px;}
+    .ks-progress{width:280px;}
   }
 </style>
 </head>
 <body>
 
-<div id="game">
+<canvas id="stage"></canvas>
+<div class="crt"></div>
+<div class="glass"></div>
 
-  <div id="boot">
-    <div class="logo">◈ ATMEN</div>
-    <div class="sub">EIN SPIEL IN FÜNF KAMMERN</div>
-    <div id="bootLines" style="width:520px;max-width:80%;text-align:left;line-height:1.8;margin-top:14px;"></div>
-    <div class="hint" id="bootHint" style="display:none;">Drücke [ENTER]</div>
+<!-- AMIGA KICKSTART BOOT -->
+<div id="kickstart">
+  <div class="ks-inner">
+    <svg class="ks-hand" viewBox="0 0 200 200">
+      <defs>
+        <linearGradient id="handG" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#c9b58b"/>
+          <stop offset="100%" stop-color="#7a6a4a"/>
+        </linearGradient>
+      </defs>
+      <path d="M 60 180 Q 60 130 80 100 Q 90 80 95 60 Q 100 40 110 40 Q 120 40 120 60 Q 125 45 135 45 Q 145 45 143 65 Q 148 55 155 60 Q 162 68 155 85 L 150 120 Q 145 150 135 175 Z"
+            fill="url(#handG)" stroke="#3a3222" stroke-width="2"/>
+      <rect x="70" y="120" width="70" height="12" rx="3" fill="#1a1410" opacity="0.7"/>
+    </svg>
+    <div class="ks-text">AMIGA · KICKSTART 3.1</div>
+    <div class="ks-progress"><i id="ksBar"></i></div>
+    <div class="ks-status" id="ksStatus">SUCHE SCHALTKREIS …</div>
+  </div>
+</div>
+
+<!-- HUD -->
+<div class="hud">
+  <div class="hud-top">
+    <div class="tag">
+      AMIGA NEON GEISTER
+      <small>DIRECTOR'S CUT · 0x00FF6A · GEIST-EXE</small>
+    </div>
+    <div class="status">
+      <span class="led" id="stateLed">SYSTEM WACHT</span>
+      <span id="fpsLabel">60 FPS</span>
+      <span id="timeLabel">00:00:00</span>
+    </div>
   </div>
 
-  <div id="top">
-    <span class="logo">◈ ATMEN</span>
-    <span class="kammer" id="kammerLbl">KAMMER 0</span>
-    <span class="stats">
-      <span>ATMUNG <b id="sBreath">0</b></span>
-      <span>SEHEN <b id="sSee">0</b></span>
-      <span>GEFÜHL <b id="sFeel">0</b></span>
-      <span>ZAHL <b id="sNum">0</b></span>
-    </span>
+  <div></div>
+
+  <div class="controls">
+    <button id="btnBreath" class="on">◈ ATEM · ON</button>
+    <button id="btnSound">♫ AMBIENT HUM</button>
+    <button id="btnGlitch">⚡ GLITCH</button>
+    <button id="btnRain" class="on">道 MATRIX · ON</button>
+    <button id="btnRays" class="on">☀ RAYS · ON</button>
+    <button id="btnCreatures" class="on">✦ WESEN · ON</button>
+    <button id="btnReflect" class="on">◐ REFLEX · ON</button>
+    <button id="btnWarp">◉ WARP</button>
+    <button id="btnFull">⛶ FULL</button>
+    <div class="meter">
+      <span>NEON</span>
+      <div class="bar"><i id="meterNeon"></i></div>
+      <span>BASS</span>
+      <div class="bar"><i id="meterBass"></i></div>
+      <span>MID</span>
+      <div class="bar"><i id="meterMid"></i></div>
+      <span>HI</span>
+      <div class="bar"><i id="meterHi"></i></div>
+    </div>
   </div>
+</div>
 
-  <div id="stage"></div>
+<div class="copper-left"></div>
+<div class="copper-right"></div>
 
+<div class="legend">
+  <b>◈ SCHALTKREIS · DC</b>
+  <div class="row"><span class="dot" style="background:#00ff6a;box-shadow:0 0 8px #00ff6a;"></span> MATRIX-REGEN 3D</div>
+  <div class="row"><span class="dot" style="background:#ff8a2a;box-shadow:0 0 8px #ff8a2a;"></span> LICHTKLINGE + RAYS</div>
+  <div class="row"><span class="dot" style="background:#ff3ea5;box-shadow:0 0 8px #ff3ea5;"></span> BIOLUMINESZENZ</div>
+  <div class="row"><span class="dot" style="background:#5cf0ff;box-shadow:0 0 8px #5cf0ff;"></span> KABELGEIST</div>
+  <div class="row"><span class="dot" style="background:#b388ff;box-shadow:0 0 8px #b388ff;"></span> SPOREN-WESEN</div>
+</div>
+
+<div class="narration" id="narration"></div>
+
+<!-- MOD TRACKER VISUALIZER -->
+<div id="tracker"><canvas id="trackerCanvas"></canvas></div>
+
+<!-- TITLE CARD -->
+<div class="titlecard hidden" id="titlecard">
+  <div class="kicker">AMIGA · 1985 · OS 3.1 · DEMOSZENE</div>
+  <h1>NEON&nbsp;GEISTER</h1>
+  <h2>DIRECTOR'S CUT</h2>
+  <p>
+    Ein Geist trägt eine <em>orange Lichtklinge</em> durch den
+    biolumineszenten Dschungel. <em>Volumetrische Strahlen</em>
+    schneiden durch fallenden Code. <em>Sporen-Wesen</em> schweben
+    durch die Tiefe. Der Boden <em>spiegelt</em> alles zurück.
+    Wer das Licht hält, erinnert sich.
+  </p>
+  <button class="enter" id="enter">◈ EINTRETEN</button>
+  <div class="subline">KOPFHÖRER EMPFOHLEN · CLICK TO INITIALIZE AUDIO</div>
 </div>
 
 <script>
+(() => {
 "use strict";
-/* ═══════════════════════════════════════════════════════════════
-   ATMEN · Ein Spiel in fünf Kammern
-   In Anlehnung an das iki1uc System: WELCOME, NANO, ZAM, A81, LÄUFER,
-   BORG, REAL.WORK — aber als ein einziges, stilles Spiel.
-   ═══════════════════════════════════════════════════════════════ */
 
+/* ═══════════════════════════════════════════════════════════
+   ◈ AMIGA NEON GEISTER · DIRECTOR'S CUT
+   Volumetrische Rays · 3D Matrix · Wesen · Reflexion · Copper
+   ═══════════════════════════════════════════════════════════ */
+
+const canvas = document.getElementById('stage');
+const ctx = canvas.getContext('2d', { alpha: false });
+// Offscreen für Reflexion
+const reflect = document.createElement('canvas');
+const rctx = reflect.getContext('2d');
+let W = 0, H = 0, DPR = 1;
+const REFLECT_H = 0.28; // 28% des Screens reflektieren
+
+function resize(){
+  DPR = Math.min(window.devicePixelRatio || 1, 2);
+  W = window.innerWidth;
+  H = window.innerHeight;
+  canvas.width = Math.floor(W * DPR);
+  canvas.height = Math.floor(H * DPR);
+  canvas.style.width = W + 'px';
+  canvas.style.height = H + 'px';
+  ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+
+  reflect.width = Math.floor(W * DPR);
+  reflect.height = Math.floor(H * REFLECT_H * DPR);
+  rctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+
+  buildMatrix3D();
+  buildMushrooms();
+  buildFog();
+  buildStars();
+  buildCables();
+  buildCreatures();
+  buildRays();
+  buildTracker();
+}
+window.addEventListener('resize', resize);
+
+/* ─── GLOBAL STATE ─────────────────────────────────────── */
 const S = {
-  kammer: 0,
-  breathCount: 0,
-  breathPhase: 0,
-  breathCycleMs: 4000,
-  lastBreathT: 0,
-  breathOk: 0,       // richtig getaktet
-  breathMiss: 0,     // daneben
-  welcomeCorrect: 0,
-  welcomeWrong: 0,
-  userFound: 0,
-  userMissed: 0,
-  pactChosen: null,
-  balanceOk: 0,
-  started: false,
-  finished: false,
+  t: 0, frame: 0, last: performance.now(), running: false,
+  breath: true, rainOn: true, warp: false,
+  raysOn: true, creaturesOn: true, reflectOn: true,
+  glitch: 0,
+  breathPhase: 0, breathCycle: 4000, breathIntensity: 0,
+  audioCtx: null, analyser: null, humGain: null, humOn: false, humNodes: null,
+  soundEnergy: 0, soundBass: 0, soundMid: 0, soundHi: 0,
+  soundPulse: 0, lastBeat: 0,
+  spectrum: new Uint8Array(128),
+  mx: 0.5, my: 0.5, tmx: 0.5, tmy: 0.5,
+  sparks: [],
+  fpsAcc: 0, fpsFrames: 0, fps: 60,
 };
 
-const stage = document.getElementById('stage');
-const kammerLbl = document.getElementById('kammerLbl');
-
-// ── LOG Helper ───────────────────────────────────────────
-function say(html, cls='narr') {
-  stage.innerHTML = `<div class="${cls}">${html}</div>`;
+/* ─── 3D PERSPEKTIVE MATRIX RAIN ─────────────────────── */
+const KATA = "アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワン";
+let matrix3D = [];
+function buildMatrix3D(){
+  matrix3D = [];
+  // mehrere Tiefenschichten
+  const layers = [
+    { z: 0.20, count: 26, fontSize: 10, speedMul: 0.35, alpha: 0.35 },
+    { z: 0.45, count: 22, fontSize: 14, speedMul: 0.65, alpha: 0.55 },
+    { z: 0.75, count: 18, fontSize: 18, speedMul: 1.0,  alpha: 0.85 },
+    { z: 1.10, count: 14, fontSize: 22, speedMul: 1.35, alpha: 1.0  },
+  ];
+  for (const L of layers){
+    for (let i = 0; i < L.count; i++){
+      matrix3D.push({
+        x: Math.random(),
+        y: Math.random() * -1.6,
+        z: L.z,
+        fontSize: L.fontSize,
+        speed: (30 + Math.random() * 90) * L.speedMul,
+        alpha: L.alpha,
+        chars: Array.from({length: 22}, () => KATA[Math.floor(Math.random()*KATA.length)]),
+        head: 0,
+        hue: Math.random() < 0.05 ? 'amber' : (Math.random() < 0.1 ? 'cyan' : 'green'),
+      });
+    }
+  }
 }
-function sayWithButtons(html, buttons) {
-  stage.innerHTML = `<div class="narr">${html}</div>
-    <div class="btnrow">${buttons.map((b,i) =>
-      `<button class="btn ${b.cls||''}" data-i="${i}">${b.label}</button>`
-    ).join('')}</div>`;
-  stage.querySelectorAll('.btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const b = buttons[parseInt(btn.dataset.i,10)];
-      if (b.onClick) b.onClick();
+function drawMatrix3D(dt){
+  if (!S.rainOn) return;
+  const globalIntensity = 0.55 + S.breathIntensity * 0.35 + S.soundHi * 0.8;
+  for (const col of matrix3D){
+    // Tiefe verstärkt Bewegung
+    col.y += (col.speed * dt) / (H) * (1 + S.soundHi * 2);
+    if (col.y > 1.4){
+      col.y = -1.6;
+      col.x = Math.random();
+      col.speed = 30 + Math.random() * 90;
+    }
+    // Perspektivische X (von der Mitte nach außen)
+    const zShift = (0.5 - col.x) * col.z * 0.3; // z verstärkt seitliche Auslenkung
+    const screenX = (col.x + zShift) * W;
+    const zScale = 0.5 + col.z * 0.8;
+    const f = col.fontSize * zScale;
+    const ch = col.fontSize;
+    for (let i = 0; i < col.chars.length; i++){
+      const y = (col.y - i * ch / H) * H;
+      if (y < -f * 2 || y > H * 1.1) continue;
+      const a = (1 - i / col.chars.length) * col.alpha * globalIntensity;
+      let c;
+      if (i === 0) c = `rgba(220,255,230,${(0.9 * a).toFixed(3)})`;
+      else if (col.hue === 'amber') c = `rgba(255,180,80,${(0.5 * a).toFixed(3)})`;
+      else if (col.hue === 'cyan') c = `rgba(120,240,255,${(0.5 * a).toFixed(3)})`;
+      else c = `rgba(0,255,106,${(0.6 * a).toFixed(3)})`;
+      ctx.fillStyle = c;
+      ctx.font = `${f}px "Courier New", monospace`;
+      ctx.textBaseline = 'top';
+      ctx.fillText(col.chars[(i + col.head) % col.chars.length], screenX, y);
+    }
+    col.head++;
+  }
+}
+
+/* ─── STARS ──────────────────────────────────────────── */
+let stars = [];
+function buildStars(){
+  stars = [];
+  const n = Math.floor((W * H) / 12000);
+  for (let i = 0; i < n; i++){
+    stars.push({
+      x: Math.random() * W, y: Math.random() * H * 0.85,
+      r: Math.random() * 1.4 + 0.2, ph: Math.random() * Math.PI * 2,
+      sp: 0.4 + Math.random() * 1.4,
     });
-  });
-}
-
-function updateHud() {
-  document.getElementById('sBreath').textContent = `${S.breathOk}/${S.breathOk + S.breathMiss}`;
-  document.getElementById('sSee').textContent = S.welcomeCorrect;
-  document.getElementById('sFeel').textContent = S.userFound;
-  document.getElementById('sNum').textContent = S.balanceOk;
-}
-
-// ═══════════════════════════════════════════════════════════════
-// BOOT
-// ═══════════════════════════════════════════════════════════════
-const BOOT_LINES = [
-  ['▸ BIOS <b>ok</b> <span style="color:#2a3644">· atem-slot geladen</span>', 160],
-  ['▸ <b>ATEM</b> <span style="color:#2a3644">· rhythmus beginnt · 4 sekunden</span>', 200],
-  ['▸ <b>WELCOME</b> <span style="color:#2a3644">· farben bereit</span>', 180],
-  ['▸ <b>LÄUFER</b> <span style="color:#2a3644">· 1000 → 1099 · suche den menschen</span>', 200],
-  ['▸ <b>ZAM GATE</b> <span style="color:#2a3644">· das tor wartet</span>', 180],
-  ['▸ <b>REAL.WORK</b> <span style="color:#2a3644">· kernel · balance</span>', 200],
-  ['▸ <b>BEREIT</b> <span style="color:#2a3644">· atme. schau. fühl. halte.</span>', 280],
-];
-
-function boot() {
-  const el = document.getElementById('bootLines');
-  let i = 0;
-  function next() {
-    if (i >= BOOT_LINES.length) {
-      document.getElementById('bootHint').style.display = 'block';
-      window.addEventListener('keydown', startGame, {once: true});
-      return;
-    }
-    const [txt, delay] = BOOT_LINES[i];
-    const div = document.createElement('div');
-    div.className = 'line';
-    div.innerHTML = txt;
-    el.appendChild(div);
-    i++;
-    setTimeout(next, delay);
   }
-  next();
+}
+function drawStars(){
+  for (const s of stars){
+    const a = 0.15 + 0.55 * (0.5 + 0.5*Math.sin(S.t * s.sp + s.ph));
+    ctx.fillStyle = `rgba(150,200,190,${a.toFixed(3)})`;
+    ctx.beginPath();
+    ctx.arc(s.x, s.y, s.r, 0, Math.PI*2);
+    ctx.fill();
+  }
 }
 
-function startGame() {
-  if (S.started) return;
-  S.started = true;
-  document.getElementById('boot').classList.add('done');
+/* ─── MUSHROOMS (3 Tiefen-Ebenen) ─────────────────────── */
+let mushrooms = [];
+function buildMushrooms(){
+  mushrooms = [];
+  const colors = [
+    { c1:'#aaffcc', c2:'#39ff88', c3:'#0a5a2a' },
+    { c1:'#b8f4ff', c2:'#5cf0ff', c3:'#0a4a5e' },
+    { c1:'#e4c4ff', c2:'#b388ff', c3:'#3a1a5e' },
+    { c1:'#ffc4e4', c2:'#ff3ea5', c3:'#5e0a3a' },
+    { c1:'#ffe0b0', c2:'#ff8a2a', c3:'#5e2a0a' },
+  ];
+  for (let i = 0; i < 22; i++){
+    const c = colors[Math.floor(Math.random()*colors.length)];
+    mushrooms.push({
+      x: Math.random() * W, y: H * (0.45 + Math.random() * 0.2),
+      size: 18 + Math.random() * 24, color: c,
+      ph: Math.random()*Math.PI*2, sp: 0.6 + Math.random()*1.1,
+      layer: 0.55, sway: Math.random()*0.6 - 0.3,
+      bloom: 0.55 + Math.random()*0.3,
+    });
+  }
+  for (let i = 0; i < 14; i++){
+    const c = colors[Math.floor(Math.random()*colors.length)];
+    mushrooms.push({
+      x: Math.random() * W, y: H * (0.62 + Math.random() * 0.15),
+      size: 40 + Math.random() * 55, color: c,
+      ph: Math.random()*Math.PI*2, sp: 0.5 + Math.random()*1.0,
+      layer: 0.85, sway: Math.random()*0.8 - 0.4,
+      bloom: 0.8 + Math.random()*0.4,
+    });
+  }
+  for (let i = 0; i < 7; i++){
+    const c = colors[Math.floor(Math.random()*colors.length)];
+    mushrooms.push({
+      x: (i + Math.random() * 0.9) * (W / 7),
+      y: H * (0.86 + Math.random() * 0.08),
+      size: 90 + Math.random() * 80, color: c,
+      ph: Math.random()*Math.PI*2, sp: 0.35 + Math.random()*0.7,
+      layer: 1.25, sway: Math.random()*1.1 - 0.5,
+      bloom: 1.0 + Math.random()*0.5,
+    });
+  }
+}
+function drawMushroom(m){
+  const pulse = 0.6 + 0.4 * Math.sin(S.t * m.sp * 0.6 + m.ph);
+  const glow = (0.55 + pulse * 0.55) * m.bloom *
+    (0.7 + S.soundEnergy * 0.8 + S.breathIntensity * 0.3);
+  const capW = m.size;
+  const capH = m.size * 0.62;
+  const stemW = m.size * 0.13;
+  const stemH = m.size * 1.15;
+  const cx = m.x + Math.sin(S.t * 0.4 + m.ph) * m.sway * 4;
+  const cy = m.y;
+  const capY = cy - stemH;
+
+  // Stem
+  ctx.save();
+  const stemGrad = ctx.createLinearGradient(cx, capY, cx, cy);
+  stemGrad.addColorStop(0, m.color.c2);
+  stemGrad.addColorStop(1, 'rgba(10,20,25,0.9)');
+  ctx.fillStyle = stemGrad;
+  ctx.globalAlpha = 0.75;
+  ctx.beginPath();
+  ctx.moveTo(cx - stemW, cy);
+  ctx.quadraticCurveTo(cx - stemW * 0.7, capY + stemH * 0.4, cx - stemW * 0.55, capY);
+  ctx.lineTo(cx + stemW * 0.55, capY);
+  ctx.quadraticCurveTo(cx + stemW * 0.7, capY + stemH * 0.4, cx + stemW, cy);
+  ctx.closePath();
+  ctx.fill();
+  ctx.restore();
+
+  // Glow halo
+  ctx.save();
+  ctx.globalCompositeOperation = 'lighter';
+  const halo = ctx.createRadialGradient(cx, capY, 0, cx, capY, capW * 1.5);
+  halo.addColorStop(0, hexA(m.color.c1, 0.55 * glow));
+  halo.addColorStop(0.35, hexA(m.color.c2, 0.30 * glow));
+  halo.addColorStop(1, hexA(m.color.c2, 0));
+  ctx.fillStyle = halo;
+  ctx.beginPath();
+  ctx.arc(cx, capY, capW * 1.5, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.restore();
+
+  // Cap
+  ctx.save();
+  const capGrad = ctx.createRadialGradient(
+    cx - capW * 0.2, capY - capH * 0.55, capW * 0.05,
+    cx, capY, capW);
+  capGrad.addColorStop(0, m.color.c1);
+  capGrad.addColorStop(0.45, m.color.c2);
+  capGrad.addColorStop(1, m.color.c3);
+  ctx.fillStyle = capGrad;
+  ctx.beginPath();
+  ctx.ellipse(cx, capY, capW * 0.62, capH * 0.62, 0, Math.PI, 0);
+  ctx.lineTo(cx + capW * 0.62, capY);
+  ctx.quadraticCurveTo(cx, capY + capH * 0.28, cx - capW * 0.62, capY);
+  ctx.closePath();
+  ctx.fill();
+  ctx.globalAlpha = 0.55 + 0.35 * pulse;
+  ctx.fillStyle = hexA('#ffffff', 0.5 * glow);
+  for (let i = 0; i < 4; i++){
+    const a = -Math.PI * 0.15 - i * 0.35 + Math.sin(S.t*0.5 + i + m.ph) * 0.03;
+    const px = cx + Math.cos(a) * capW * 0.4;
+    const py = capY + Math.sin(a) * capH * 0.32;
+    ctx.beginPath();
+    ctx.arc(px, py, capW * 0.06, 0, Math.PI*2);
+    ctx.fill();
+  }
+  ctx.restore();
+
+  // Spores
+  ctx.save();
+  ctx.globalCompositeOperation = 'lighter';
+  const sporeCount = Math.round(4 + glow * 6);
+  for (let i = 0; i < sporeCount; i++){
+    const a = (i / sporeCount) * Math.PI * 2 + S.t * 0.6 + m.ph;
+    const rr = capW * (0.7 + Math.random() * 0.6);
+    const sx = cx + Math.cos(a) * rr;
+    const sy = capY + Math.sin(a) * rr * 0.7 - Math.sin(S.t*1.5 + i)*4;
+    ctx.fillStyle = hexA(m.color.c1, 0.5 * glow);
+    ctx.beginPath();
+    ctx.arc(sx, sy, 0.6 + Math.random() * 1.6, 0, Math.PI*2);
+    ctx.fill();
+  }
+  ctx.restore();
+}
+
+/* ─── CABLES ─────────────────────────────────────────── */
+let cables = [];
+function buildCables(){
+  cables = [];
+  for (let i = 0; i < 12; i++){
+    const pts = [];
+    const x0 = Math.random() * W;
+    const len = 6 + Math.floor(Math.random() * 4);
+    for (let k = 0; k < len; k++){
+      pts.push({
+        x: x0 + (Math.random()-0.5)*160 + Math.sin(i + k)*40,
+        y: -20 + (k/len) * (H * 0.85) + Math.random() * 40,
+      });
+    }
+    cables.push({
+      pts,
+      hue: Math.random() < 0.4 ? 'cyan' : (Math.random() < 0.5 ? 'green' : 'dim'),
+      w: 4 + Math.random() * 6,
+      ph: Math.random() * Math.PI * 2,
+    });
+  }
+}
+function drawCables(){
+  for (const c of cables){
+    ctx.save();
+    ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+    ctx.strokeStyle = 'rgba(6,14,20,0.95)';
+    ctx.lineWidth = c.w;
+    ctx.beginPath();
+    c.pts.forEach((p, i) => {
+      const sway = Math.sin(S.t*0.3 + i*0.5 + c.ph) * 4;
+      if (i === 0) ctx.moveTo(p.x + sway, p.y);
+      else ctx.lineTo(p.x + sway, p.y);
+    });
+    ctx.stroke();
+
+    const lineCol = c.hue === 'cyan'
+      ? `rgba(120,240,255,${0.18 + S.soundMid * 0.4})`
+      : c.hue === 'green'
+      ? `rgba(0,255,106,${0.20 + S.soundMid * 0.4})`
+      : `rgba(255,138,42,${0.10 + S.soundMid * 0.2})`;
+    ctx.strokeStyle = lineCol;
+    ctx.lineWidth = Math.max(1, c.w * 0.18);
+    ctx.shadowColor = lineCol; ctx.shadowBlur = 14;
+    ctx.beginPath();
+    c.pts.forEach((p, i) => {
+      const sway = Math.sin(S.t*0.3 + i*0.5 + c.ph) * 4;
+      if (i === 0) ctx.moveTo(p.x + sway, p.y);
+      else ctx.lineTo(p.x + sway, p.y);
+    });
+    ctx.stroke();
+    ctx.restore();
+  }
+}
+
+/* ─── CREATURES: Sporen-Wesen + Glühwürmchen ─────────── */
+let creatures = [];
+function buildCreatures(){
+  creatures = [];
+  // Sporen-Wesen (jellyfish-like)
+  for (let i = 0; i < 9; i++){
+    const c = ['#b388ff','#5cf0ff','#39ff88','#ff3ea5','#ffb347'][i % 5];
+    creatures.push({
+      kind: 'spore',
+      x: Math.random() * W,
+      y: H * (0.15 + Math.random() * 0.5),
+      vx: (Math.random()-0.5) * 12,
+      vy: -3 - Math.random() * 8,
+      size: 6 + Math.random() * 10,
+      ph: Math.random() * Math.PI * 2,
+      sp: 0.5 + Math.random() * 1.2,
+      color: c,
+      tentacles: 5 + Math.floor(Math.random() * 4),
+    });
+  }
+  // Glühwürmchen (fireflies)
+  for (let i = 0; i < 26; i++){
+    const c = ['#ffb347','#39ff88','#5cf0ff'][i % 3];
+    creatures.push({
+      kind: 'firefly',
+      x: Math.random() * W,
+      y: H * (0.3 + Math.random() * 0.65),
+      vx: (Math.random()-0.5) * 22,
+      vy: (Math.random()-0.5) * 16,
+      size: 1.4 + Math.random() * 1.6,
+      ph: Math.random() * Math.PI * 2,
+      sp: 1.5 + Math.random() * 3,
+      color: c,
+    });
+  }
+}
+function updateCreatures(dt){
+  for (const cr of creatures){
+    if (cr.kind === 'spore'){
+      cr.x += cr.vx * dt;
+      cr.y += cr.vy * dt;
+      cr.vx += (Math.random()-0.5) * 6 * dt;
+      cr.vy += (Math.random()-0.5) * 4 * dt;
+      // sanft wieder reinziehen
+      if (cr.y < -20){ cr.y = H + 20; cr.x = Math.random()*W; }
+      if (cr.x < -20){ cr.x = W + 20; }
+      if (cr.x > W + 20){ cr.x = -20; }
+      cr.vx *= 0.995; cr.vy *= 0.995;
+    } else {
+      // firefly: langsame drift + zufällige Impulse
+      cr.x += cr.vx * dt * (1 + S.soundHi * 3);
+      cr.y += cr.vy * dt * (1 + S.soundHi * 3);
+      cr.vx += (Math.random()-0.5) * 30 * dt;
+      cr.vy += (Math.random()-0.5) * 30 * dt;
+      cr.vx *= 0.96; cr.vy *= 0.96;
+      if (cr.x < 0 || cr.x > W) cr.vx *= -1;
+      if (cr.y < H*0.2 || cr.y > H*0.98) cr.vy *= -1;
+    }
+  }
+}
+function drawCreatures(){
+  if (!S.creaturesOn) return;
+  ctx.save();
+  ctx.globalCompositeOperation = 'lighter';
+  for (const cr of creatures){
+    const pulse = 0.5 + 0.5 * Math.sin(S.t * cr.sp + cr.ph);
+    if (cr.kind === 'spore'){
+      const a = 0.35 + pulse * 0.5 + S.soundEnergy * 0.4;
+      // Kopf
+      const g = ctx.createRadialGradient(cr.x, cr.y, 0, cr.x, cr.y, cr.size * 3);
+      g.addColorStop(0, hexA(cr.color, a));
+      g.addColorStop(0.4, hexA(cr.color, a * 0.4));
+      g.addColorStop(1, hexA(cr.color, 0));
+      ctx.fillStyle = g;
+      ctx.beginPath();
+      ctx.arc(cr.x, cr.y, cr.size * 3, 0, Math.PI*2);
+      ctx.fill();
+
+      // Kopfkern
+      ctx.fillStyle = hexA('#ffffff', 0.6 + pulse * 0.3);
+      ctx.beginPath();
+      ctx.arc(cr.x, cr.y, cr.size * 0.35, 0, Math.PI*2);
+      ctx.fill();
+
+      // Tentakel
+      ctx.strokeStyle = hexA(cr.color, a * 0.8);
+      ctx.lineWidth = 1.1;
+      for (let i = 0; i < cr.tentacles; i++){
+        const ang = (i / cr.tentacles) * Math.PI * 2;
+        const tl = cr.size * (1.5 + Math.sin(S.t*1.8 + i)*0.3);
+        ctx.beginPath();
+        ctx.moveTo(cr.x, cr.y);
+        ctx.quadraticCurveTo(
+          cr.x + Math.cos(ang) * tl * 0.5,
+          cr.y + Math.sin(ang) * tl * 0.5 + 2,
+          cr.x + Math.cos(ang) * tl,
+          cr.y + Math.sin(ang) * tl + 3
+        );
+        ctx.stroke();
+      }
+    } else {
+      // firefly
+      const a = 0.4 + pulse * 0.6;
+      const g = ctx.createRadialGradient(cr.x, cr.y, 0, cr.x, cr.y, cr.size * 6);
+      g.addColorStop(0, hexA(cr.color, a));
+      g.addColorStop(1, hexA(cr.color, 0));
+      ctx.fillStyle = g;
+      ctx.beginPath();
+      ctx.arc(cr.x, cr.y, cr.size * 6, 0, Math.PI*2);
+      ctx.fill();
+      ctx.fillStyle = hexA('#ffffff', 0.85);
+      ctx.beginPath();
+      ctx.arc(cr.x, cr.y, cr.size * 0.5, 0, Math.PI*2);
+      ctx.fill();
+    }
+  }
+  ctx.restore();
+}
+
+/* ─── VOLUMETRIC GOD RAYS ────────────────────────────── */
+let rays = [];
+function buildRays(){
+  rays = [];
+  // Rays strahlen aus einer Quelle (Klinge) und aus Rissen
+  for (let i = 0; i < 14; i++){
+    rays.push({
+      angle: -0.6 + (Math.random() - 0.5) * 2.2,
+      originX: 0.5 + (Math.random() - 0.5) * 0.15,
+      originY: 0.42 + (Math.random() - 0.5) * 0.08,
+      width: 0.04 + Math.random() * 0.1,
+      color: Math.random() < 0.7 ? 'amber' : (Math.random() < 0.5 ? 'green' : 'cyan'),
+      intensity: 0.25 + Math.random() * 0.4,
+      ph: Math.random() * Math.PI * 2,
+      sp: 0.15 + Math.random() * 0.3,
+      len: 0.6 + Math.random() * 0.6,
+    });
+  }
+}
+function drawRays(){
+  if (!S.raysOn) return;
+  ctx.save();
+  ctx.globalCompositeOperation = 'lighter';
+  for (const r of rays){
+    const flick = 0.7 + 0.3 * Math.sin(S.t * r.sp * 3 + r.ph) + S.soundPulse * 0.5;
+    const ox = r.originX * W;
+    const oy = r.originY * H;
+    const len = Math.max(W, H) * r.len;
+    const ex = ox + Math.cos(r.angle) * len;
+    const ey = oy + Math.sin(r.angle) * len;
+    const col = r.color === 'amber' ? '255,180,80'
+              : r.color === 'green' ? '0,255,106'
+              : '120,240,255';
+    const a = r.intensity * flick * (0.5 + S.soundEnergy * 0.8);
+
+    // als Gradient entlang des Strahls
+    const grad = ctx.createLinearGradient(ox, oy, ex, ey);
+    grad.addColorStop(0, `rgba(${col},${a.toFixed(3)})`);
+    grad.addColorStop(0.6, `rgba(${col},${(a*0.4).toFixed(3)})`);
+    grad.addColorStop(1, `rgba(${col},0)`);
+
+    // Strahl als Polygon
+    const perpX = -Math.sin(r.angle);
+    const perpY = Math.cos(r.angle);
+    const w = r.width * Math.max(W, H);
+    ctx.fillStyle = grad;
+    ctx.beginPath();
+    ctx.moveTo(ox - perpX * w * 0.2, oy - perpY * w * 0.2);
+    ctx.lineTo(ox + perpX * w * 0.2, oy + perpY * w * 0.2);
+    ctx.lineTo(ex + perpX * w, ey + perpY * w);
+    ctx.lineTo(ex - perpX * w, ey - perpY * w);
+    ctx.closePath();
+    ctx.fill();
+  }
+  ctx.restore();
+}
+
+/* ─── GHOST (Figur + Klinge) ────────────────────────── */
+function drawGhost(){
+  const baseX = W * 0.56;
+  const baseY = H * 0.46;
+  const scale = Math.min(W / 1500, H / 950) * 1.05;
+  const bob = Math.sin(S.t * 0.8) * 4 + Math.sin(S.t * 0.3) * 3;
+  const breathe = S.breathIntensity * 4;
+  const cx = baseX;
+  const cy = baseY + bob + breathe * 0.5;
+
+  ctx.save();
+  ctx.translate(cx, cy);
+  ctx.scale(scale, scale);
+
+  // Plattform-Glow
+  ctx.save();
+  ctx.globalCompositeOperation = 'lighter';
+  const platGlow = ctx.createRadialGradient(0, 130, 0, 0, 130, 340);
+  platGlow.addColorStop(0, `rgba(0,255,106,${0.25 + S.soundEnergy*0.2})`);
+  platGlow.addColorStop(0.5, `rgba(0,255,106,0.06)`);
+  platGlow.addColorStop(1, 'rgba(0,0,0,0)');
+  ctx.fillStyle = platGlow;
+  ctx.fillRect(-340, -20, 680, 300);
+  ctx.restore();
+
+  // Robe
+  ctx.save();
+  const robeGrad = ctx.createLinearGradient(0, -180, 0, 160);
+  robeGrad.addColorStop(0, '#d9c9a3');
+  robeGrad.addColorStop(0.35, '#c9b58b');
+  robeGrad.addColorStop(0.7, '#7a6a4a');
+  robeGrad.addColorStop(1, '#3a3222');
+  ctx.fillStyle = robeGrad;
+  ctx.beginPath();
+  ctx.moveTo(-52, -150);
+  ctx.quadraticCurveTo(-88, -60, -120, 150);
+  ctx.lineTo(150, 150);
+  ctx.quadraticCurveTo(120, -40, 70, -140);
+  ctx.quadraticCurveTo(30, -180, -20, -175);
+  ctx.closePath();
+  ctx.fill();
+  ctx.strokeStyle = 'rgba(40,30,15,0.35)';
+  ctx.lineWidth = 2;
+  for (let i = 0; i < 4; i++){
+    ctx.beginPath();
+    ctx.moveTo(-30 + i*28, -80);
+    ctx.quadraticCurveTo(-40 + i*30, 20, -50 + i*32, 148);
+    ctx.stroke();
+  }
+  ctx.fillStyle = '#4a3a22';
+  ctx.fillRect(-70, -30, 200, 22);
+  ctx.fillStyle = '#1a1208';
+  ctx.fillRect(-70, -30, 200, 4);
+  ctx.fillRect(-70, -14, 200, 4);
+  ctx.restore();
+
+  // Hood
+  ctx.save();
+  ctx.fillStyle = '#1a1410';
+  ctx.beginPath();
+  ctx.moveTo(-58, -150);
+  ctx.quadraticCurveTo(-90, -230, -20, -240);
+  ctx.quadraticCurveTo(60, -245, 78, -180);
+  ctx.quadraticCurveTo(60, -140, 40, -140);
+  ctx.quadraticCurveTo(20, -150, -10, -148);
+  ctx.closePath();
+  ctx.fill();
+  const hoodGrad = ctx.createRadialGradient(15, -190, 5, 15, -195, 60);
+  hoodGrad.addColorStop(0, '#0a0806');
+  hoodGrad.addColorStop(1, 'rgba(20,16,12,0.05)');
+  ctx.fillStyle = hoodGrad;
+  ctx.beginPath();
+  ctx.ellipse(15, -190, 46, 52, 0, 0, Math.PI*2);
+  ctx.fill();
+  ctx.globalCompositeOperation = 'lighter';
+  const eyeAlpha = 0.25 + S.soundEnergy * 0.5 + S.breathIntensity * 0.2;
+  ctx.fillStyle = `rgba(255,160,60,${eyeAlpha.toFixed(3)})`;
+  ctx.beginPath();
+  ctx.arc(28, -196, 3.5, 0, Math.PI*2);
+  ctx.fill();
+  ctx.restore();
+
+  // Hilt + Klinge
+  const hx = 130, hy = -55;
+  ctx.save();
+  ctx.translate(hx, hy);
+  ctx.rotate(0.45);
+  ctx.fillStyle = '#1a1a1c';
+  ctx.fillRect(-10, -6, 44, 12);
+  ctx.fillStyle = '#3a3a3e';
+  ctx.fillRect(-10, -6, 6, 12);
+  ctx.fillRect(24, -6, 10, 12);
+  ctx.fillStyle = '#666';
+  ctx.fillRect(2, -7, 3, 14);
+  ctx.fillRect(9, -7, 3, 14);
+  ctx.fillRect(16, -7, 3, 14);
+  ctx.restore();
+
+  ctx.save();
+  ctx.fillStyle = '#2a1e14';
+  ctx.beginPath();
+  ctx.ellipse(128, -58, 14, 10, 0.3, 0, Math.PI*2);
+  ctx.fill();
+  ctx.restore();
+
+  // Klinge
+  ctx.save();
+  const bladeLen = 320;
+  const bladeAngle = 0.45;
+  const bx0 = hx + Math.cos(bladeAngle) * 4;
+  const by0 = hy + Math.sin(bladeAngle) * 4;
+  const bx1 = bx0 + Math.cos(bladeAngle) * bladeLen;
+  const by1 = by0 + Math.sin(bladeAngle) * bladeLen;
+  ctx.globalCompositeOperation = 'lighter';
+  const flicker = 0.85 + Math.random() * 0.15 + S.soundPulse * 0.4;
+  const outerGlow = ctx.createLinearGradient(bx0, by0, bx1, by1);
+  outerGlow.addColorStop(0, `rgba(255,160,60,${0.55*flicker})`);
+  outerGlow.addColorStop(0.6, `rgba(255,110,30,${0.35*flicker})`);
+  outerGlow.addColorStop(1, `rgba(255,60,10,0)`);
+  ctx.strokeStyle = outerGlow;
+  ctx.lineWidth = 42 * flicker;
+  ctx.lineCap = 'round';
+  ctx.beginPath();
+  ctx.moveTo(bx0, by0); ctx.lineTo(bx1, by1); ctx.stroke();
+
+  ctx.strokeStyle = `rgba(255,180,80,${0.85*flicker})`;
+  ctx.lineWidth = 18;
+  ctx.beginPath();
+  ctx.moveTo(bx0, by0); ctx.lineTo(bx1, by1); ctx.stroke();
+
+  ctx.strokeStyle = `rgba(255,240,200,0.95)`;
+  ctx.lineWidth = 7;
+  ctx.beginPath();
+  ctx.moveTo(bx0, by0); ctx.lineTo(bx1, by1); ctx.stroke();
+
+  ctx.fillStyle = `rgba(255,250,220,${0.9*flicker})`;
+  ctx.beginPath();
+  ctx.arc(bx1, by1, 5, 0, Math.PI*2);
+  ctx.fill();
+
+  // Tip-Sparks
+  if (Math.random() < 0.5 + S.soundEnergy * 0.6){
+    const tipWX = cx + bx1 * scale;
+    const tipWY = cy + by1 * scale;
+    for (let i = 0; i < 2; i++){
+      spawnSpark(
+        tipWX + (Math.random()-0.5)*6,
+        tipWY + (Math.random()-0.5)*6,
+        Math.random() < 0.7 ? '#ffb347' : '#ffffff', 1, 'spark');
+    }
+  }
+  ctx.restore();
+
+  // Under-Glow
+  ctx.save();
+  ctx.globalCompositeOperation = 'lighter';
+  const under = ctx.createRadialGradient(0, 150, 0, 0, 150, 260);
+  under.addColorStop(0, `rgba(255,140,40,${0.22 + S.soundEnergy*0.25})`);
+  under.addColorStop(1, 'rgba(0,0,0,0)');
+  ctx.fillStyle = under;
+  ctx.beginPath();
+  ctx.ellipse(0, 155, 260, 40, 0, 0, Math.PI*2);
+  ctx.fill();
+  ctx.restore();
+
+  ctx.restore();
+}
+
+/* ─── SPARKS ─────────────────────────────────────────── */
+function spawnSpark(x, y, color, count = 1, kind = 'spark'){
+  for (let i = 0; i < count; i++){
+    const a = Math.random() * Math.PI * 2;
+    const sp = 0.6 + Math.random() * 2.4;
+    S.sparks.push({
+      x, y, vx: Math.cos(a)*sp, vy: Math.sin(a)*sp - 0.3,
+      life: 1, maxLife: 60 + Math.random()*80,
+      color, size: 1 + Math.random()*2.2, kind,
+    });
+  }
+  if (S.sparks.length > 700) S.sparks.splice(0, S.sparks.length - 700);
+}
+function updateSparks(dt){
+  for (let i = S.sparks.length - 1; i >= 0; i--){
+    const p = S.sparks[i];
+    p.x += p.vx * dt * 60 * (1 + S.soundEnergy * 1.5);
+    p.y += p.vy * dt * 60 * (1 + S.soundEnergy * 1.5);
+    p.vx *= 0.97; p.vy *= 0.97; p.vy += 0.018;
+    p.life -= dt / (p.maxLife / 60);
+    if (p.life <= 0) S.sparks.splice(i, 1);
+  }
+}
+function drawSparks(){
+  ctx.save();
+  ctx.globalCompositeOperation = 'lighter';
+  for (const p of S.sparks){
+    ctx.globalAlpha = Math.max(0, p.life);
+    ctx.fillStyle = p.color;
+    ctx.shadowColor = p.color;
+    ctx.shadowBlur = 10;
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.size * p.life, 0, Math.PI*2);
+    ctx.fill();
+  }
+  ctx.restore();
+}
+
+/* ─── FOG ───────────────────────────────────────────── */
+let fogBlobs = [];
+function buildFog(){
+  fogBlobs = [];
+  for (let i = 0; i < 26; i++){
+    fogBlobs.push({
+      x: Math.random() * W, y: H * (0.5 + Math.random() * 0.5),
+      r: 120 + Math.random() * 320,
+      ph: Math.random() * Math.PI * 2,
+      sp: 0.05 + Math.random() * 0.2,
+      hue: Math.random() < 0.5 ? 'green' : (Math.random() < 0.5 ? 'amber' : 'cyan'),
+      a: 0.02 + Math.random() * 0.06,
+    });
+  }
+}
+function drawFog(){
+  ctx.save();
+  ctx.globalCompositeOperation = 'lighter';
+  for (const f of fogBlobs){
+    const dx = Math.sin(S.t * f.sp + f.ph) * 60;
+    const dy = Math.cos(S.t * f.sp * 0.7 + f.ph) * 30;
+    const col = f.hue === 'green' ? '0,255,106'
+              : f.hue === 'amber' ? '255,138,42' : '92,240,255';
+    const breath = 0.7 + S.breathIntensity * 0.5 + S.soundEnergy * 0.4;
+    const g = ctx.createRadialGradient(f.x+dx, f.y+dy, 0, f.x+dx, f.y+dy, f.r);
+    g.addColorStop(0, `rgba(${col},${(f.a * breath).toFixed(3)})`);
+    g.addColorStop(1, `rgba(${col},0)`);
+    ctx.fillStyle = g;
+    ctx.beginPath();
+    ctx.arc(f.x+dx, f.y+dy, f.r, 0, Math.PI*2);
+    ctx.fill();
+  }
+  ctx.restore();
+}
+
+/* ─── ZWEITER GEIST (Easter Egg, tief im Nebel) ──────── */
+function drawSecondGhost(){
+  // sehr subtil, nur bei genug Energie
+  const a = Math.max(0, S.soundEnergy - 0.15) * 0.6 + S.soundPulse * 0.3;
+  if (a < 0.05) return;
+  const x = W * 0.16;
+  const y = H * 0.62;
+  const s = 0.28;
+  ctx.save();
+  ctx.globalAlpha = Math.min(a, 0.55);
+  ctx.translate(x, y);
+  ctx.scale(s, s);
+  // Silhouette
+  ctx.fillStyle = 'rgba(10,20,15,0.9)';
+  ctx.beginPath();
+  ctx.moveTo(-40, -120);
+  ctx.quadraticCurveTo(-70, -50, -90, 130);
+  ctx.lineTo(120, 130);
+  ctx.quadraticCurveTo(95, -30, 55, -115);
+  ctx.quadraticCurveTo(25, -150, -15, -145);
+  ctx.closePath();
+  ctx.fill();
+  // Hood
+  ctx.fillStyle = '#0a0a08';
+  ctx.beginPath();
+  ctx.moveTo(-45, -120);
+  ctx.quadraticCurveTo(-75, -190, -15, -200);
+  ctx.quadraticCurveTo(45, -205, 62, -155);
+  ctx.quadraticCurveTo(48, -120, 30, -120);
+  ctx.closePath();
+  ctx.fill();
+  // Cyan-Augen
+  ctx.globalCompositeOperation = 'lighter';
+  ctx.fillStyle = `rgba(120,240,255,${a*1.4})`;
+  ctx.beginPath();
+  ctx.arc(15, -165, 2.4, 0, Math.PI*2);
+  ctx.fill();
+  ctx.restore();
+}
+
+/* ─── REFLEXION (Boden spiegelt) ─────────────────────── */
+function drawReflection(){
+  if (!S.reflectOn) return;
+  // Wir haben am Ende von render() den aktuellen Frame gezeichnet.
+  // Jetzt: das untere Drittel spiegeln.
+  const sliceH = H * REFLECT_H;
+  const srcY = H - sliceH - 4; // kurz über dem Boden
+  try {
+    // In den Offscreen kopieren (aus dem Hauptcanvas)
+    rctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+    rctx.clearRect(0, 0, W, sliceH);
+    rctx.save();
+    rctx.translate(0, sliceH);
+    rctx.scale(1, -1);
+    rctx.drawImage(canvas,
+      0, srcY * DPR, W * DPR, sliceH * DPR,
+      0, 0, W, sliceH);
+    rctx.restore();
+
+    // geflippt und mit Gradient-Fade auf den Boden legen
+    ctx.save();
+    ctx.globalCompositeOperation = 'lighter';
+    ctx.globalAlpha = 0.45;
+    ctx.drawImage(reflect, 0, 0, W, sliceH, 0, H - sliceH, W, sliceH);
+
+    // dunkler Verlauf nach unten
+    const fade = ctx.createLinearGradient(0, H - sliceH, 0, H);
+    fade.addColorStop(0, 'rgba(2,4,10,0)');
+    fade.addColorStop(1, 'rgba(2,4,10,0.85)');
+    ctx.globalCompositeOperation = 'source-over';
+    ctx.globalAlpha = 1;
+    ctx.fillStyle = fade;
+    ctx.fillRect(0, H - sliceH, W, sliceH);
+
+    // Wellen-Ripple
+    ctx.globalCompositeOperation = 'lighter';
+    ctx.globalAlpha = 0.10;
+    ctx.strokeStyle = '#5cf0ff';
+    for (let i = 0; i < 4; i++){
+      const yy = H - sliceH + (i+1) * (sliceH/5) + Math.sin(S.t*1.2 + i)*2;
+      ctx.beginPath();
+      ctx.moveTo(0, yy);
+      for (let x = 0; x <= W; x += 20){
+        ctx.lineTo(x, yy + Math.sin(x * 0.02 + S.t * 1.5) * 1.5);
+      }
+      ctx.stroke();
+    }
+    ctx.restore();
+  } catch(_){}
+}
+
+/* ─── POST FX ────────────────────────────────────────── */
+function drawGrain(){
+  const density = 120 + S.soundEnergy * 200;
+  ctx.save();
+  ctx.globalCompositeOperation = 'overlay';
+  ctx.globalAlpha = 0.05 + S.soundEnergy * 0.08;
+  for (let i = 0; i < density; i++){
+    ctx.fillStyle = Math.random() < 0.5 ? '#000' : '#fff';
+    ctx.fillRect(Math.random()*W, Math.random()*H, 1, 1);
+  }
+  ctx.restore();
+}
+function drawGlitch(){
+  if (S.glitch <= 0) return;
+  const strength = S.glitch;
+  const slices = Math.floor(6 + strength * 14);
+  for (let i = 0; i < slices; i++){
+    const sy = Math.random() * H;
+    const sh = 4 + Math.random() * 22 * strength;
+    const dx = (Math.random() - 0.5) * 60 * strength;
+    try {
+      const data = ctx.getImageData(0, sy, W, sh);
+      ctx.putImageData(data, dx, sy + (Math.random()-0.5)*4);
+    } catch(_){}
+  }
+  ctx.save();
+  ctx.globalCompositeOperation = 'lighter';
+  ctx.globalAlpha = 0.35 * strength;
+  ctx.fillStyle = '#ff3ea5';
+  ctx.fillRect((Math.random()-0.5)*40*strength, 0, W, H);
+  ctx.fillStyle = '#5cf0ff';
+  ctx.fillRect((Math.random()-0.5)*40*strength, 0, W, H);
+  ctx.restore();
+}
+function drawVignette(){
+  const g = ctx.createRadialGradient(W/2, H/2, H*0.3, W/2, H/2, Math.max(W,H)*0.75);
+  g.addColorStop(0, 'rgba(0,0,0,0)');
+  g.addColorStop(1, 'rgba(0,0,0,0.65)');
+  ctx.fillStyle = g;
+  ctx.fillRect(0, 0, W, H);
+}
+
+/* ─── COPPER BARS (Amiga) ────────────────────────────── */
+function drawCopperBars(){
+  const elL = document.querySelector('.copper-left');
+  const elR = document.querySelector('.copper-right');
+  if (!elL) return;
+  // Dynamischer Gradient, wandert
+  const phase = (S.t * 0.4) % 1;
+  const stops = [];
+  const palette = ['#00ff6a','#5cf0ff','#b388ff','#ff3ea5','#ff8a2a'];
+  for (let i = 0; i <= 6; i++){
+    const p = i/6;
+    const idx = Math.floor((p + phase) * palette.length) % palette.length;
+    stops.push(`${palette[idx]} ${(p*100).toFixed(1)}%`);
+  }
+  const grad = `linear-gradient(to bottom, ${stops.join(',')})`;
+  elL.style.background = grad;
+  elR.style.background = grad;
+  elL.style.boxShadow = `0 0 20px ${palette[Math.floor(phase*palette.length)%palette.length]}`;
+  elR.style.boxShadow = `0 0 20px ${palette[Math.floor(phase*palette.length)%palette.length]}`;
+}
+
+/* ─── MOD TRACKER SPECTRUM (Amiga Style) ─────────────── */
+const trackerCanvas = document.getElementById('trackerCanvas');
+const tctx = trackerCanvas.getContext('2d');
+function buildTracker(){
+  trackerCanvas.width = Math.floor(W * DPR);
+  trackerCanvas.height = Math.floor(44 * DPR);
+  trackerCanvas.style.width = W + 'px';
+  trackerCanvas.style.height = '44px';
+  tctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+}
+function drawTracker(){
+  const th = 44;
+  tctx.clearRect(0, 0, W, th);
+  // Hintergrund
+  tctx.fillStyle = 'rgba(2,4,10,0.7)';
+  tctx.fillRect(0, 0, W, th);
+
+  const bars = 64;
+  const bw = W / bars;
+  for (let i = 0; i < bars; i++){
+    // kombiniere spektrum + synthetische Frequenzbänder
+    let v;
+    if (S.spectrum && S.humOn){
+      v = S.spectrum[Math.floor(i / bars * S.spectrum.length * 0.7)] / 255;
+    } else {
+      // Fallback: breath-driven
+      v = Math.abs(Math.sin(S.t * 2 + i * 0.4)) * 0.5 * (0.4 + S.breathIntensity);
+    }
+    const h = Math.max(2, v * (th - 6));
+    const hue = (i / bars) * 120 + 60; // grün → gelb
+    tctx.fillStyle = `hsl(${hue}, 100%, ${35 + v*30}%)`;
+    tctx.fillRect(i * bw + 1, th - h - 2, bw - 2, h);
+    // Peak-Marker
+    tctx.fillStyle = `hsl(${hue}, 100%, 85%)`;
+    tctx.fillRect(i * bw + 1, th - h - 3, bw - 2, 1);
+  }
+  // seitliche Skala
+  tctx.fillStyle = 'rgba(104,246,192,0.35)';
+  tctx.font = '8px "Courier New", monospace';
+  tctx.textBaseline = 'top';
+  tctx.fillText('MOD · SCHALTKREIS-EXE · 64 CH', 8, 3);
+  tctx.textAlign = 'right';
+  tctx.fillText(`BPM 125 · ROW ${(Math.floor(S.t*8)%64).toString().padStart(2,'0')}`, W - 8, 3);
+  tctx.textAlign = 'left';
+}
+
+/* ─── BREATHING ──────────────────────────────────────── */
+function updateBreath(){
+  S.breathPhase = ((performance.now() % S.breathCycle) / S.breathCycle);
+  const ph = S.breathPhase;
+  let i;
+  if (ph < 0.4) i = ph / 0.4;
+  else if (ph < 0.5) i = 1;
+  else if (ph < 0.9) i = 1 - (ph - 0.5) / 0.4;
+  else i = 0;
+  S.breathIntensity = i;
+}
+
+/* ─── AUDIO ──────────────────────────────────────────── */
+function initAudio(){
+  if (S.audioCtx) return;
+  try {
+    const AC = window.AudioContext || window.webkitAudioContext;
+    S.audioCtx = new AC();
+    S.analyser = S.audioCtx.createAnalyser();
+    S.analyser.fftSize = 256;
+    S.analyser.smoothingTimeConstant = 0.82;
+    S.analyser.connect(S.audioCtx.destination);
+  } catch(_){}
+}
+function startHum(){
+  if (!S.audioCtx || S.humOn) return;
+  const ac = S.audioCtx;
+  const master = ac.createGain();
+  master.gain.value = 0;
+  master.connect(S.analyser);
+
+  const o1 = ac.createOscillator(); o1.type='sine'; o1.frequency.value=55;
+  const g1 = ac.createGain(); g1.gain.value=0.5;
+  o1.connect(g1); g1.connect(master);
+
+  const o2 = ac.createOscillator(); o2.type='sine'; o2.frequency.value=82.5;
+  const g2 = ac.createGain(); g2.gain.value=0.28;
+  o2.connect(g2); g2.connect(master);
+
+  const o3 = ac.createOscillator(); o3.type='triangle'; o3.frequency.value=220;
+  const g3 = ac.createGain(); g3.gain.value=0.05;
+  const lfo = ac.createOscillator(); lfo.frequency.value=0.25;
+  const lfoG = ac.createGain(); lfoG.gain.value=0.04;
+  lfo.connect(lfoG); lfoG.connect(g3.gain);
+  o3.connect(g3); g3.connect(master);
+
+  const lp = ac.createBiquadFilter();
+  lp.type='lowpass'; lp.frequency.value=420; lp.Q.value=0.6;
+  master.disconnect();
+  master.connect(lp);
+  lp.connect(S.analyser);
+
+  o1.start(); o2.start(); o3.start(); lfo.start();
+  master.gain.setValueAtTime(0, ac.currentTime);
+  master.gain.linearRampToValueAtTime(0.18, ac.currentTime + 3.0);
+
+  S.humGain = master;
+  S.humOn = true;
+  S.humNodes = { o1, o2, o3, lfo, lp, master };
+}
+function stopHum(){
+  if (!S.humOn || !S.humNodes) return;
+  const ac = S.audioCtx;
+  S.humGain.gain.cancelScheduledValues(ac.currentTime);
+  S.humGain.gain.setValueAtTime(S.humGain.gain.value, ac.currentTime);
+  S.humGain.gain.linearRampToValueAtTime(0, ac.currentTime + 0.6);
+  const nodes = S.humNodes;
   setTimeout(() => {
-    document.getElementById('boot').style.display = 'none';
-    kammer1();
-  }, 800);
+    try { nodes.o1.stop(); nodes.o2.stop(); nodes.o3.stop(); nodes.lfo.stop(); } catch(_){}
+  }, 700);
+  S.humOn = false;
 }
-
-// ═══════════════════════════════════════════════════════════════
-// KAMMER 1 · ATEM  (Rhythmus)
-// ═══════════════════════════════════════════════════════════════
-function kammer1() {
-  S.kammer = 1;
-  kammerLbl.textContent = 'KAMMER 1 · ATEM';
-  updateHud();
-
-  say(`Bevor du etwas tun kannst, musst du <span class="hl">atmen</span>.
-    <br><br>Der Kern öffnet sich. Ein. Aus. Vier Sekunden. Vier Sekunden.
-    <br><br>Klicke auf den Kern, wenn er <span class="hl-o2">EIN</span> anzeigt.
-    Zehn Atemzüge. Danach darfst du weiter.`);
-
-  setTimeout(() => startBreathRound(), 2200);
-}
-
-function startBreathRound() {
-  stage.innerHTML = `
-    <div id="breathWrap">
-      <div id="breathRing"></div>
-      <div id="breathCore"></div>
-      <div id="breathGlyph">◈</div>
-      <div id="breathWord">· bereit ·</div>
-    </div>`;
-  const wrap = document.getElementById('breathWrap');
-  const core = document.getElementById('breathCore');
-  const ring = document.getElementById('breathRing');
-  const glyph = document.getElementById('breathGlyph');
-  const word = document.getElementById('breathWord');
-
-  S.breathCount = 0;
-  S.breathOk = 0;
-  S.breathMiss = 0;
-
-  const startT = performance.now();
-  S.lastBreathT = startT;
-  let lastPhase = 'idle';
-
-  function tick(now) {
-    const cycle = now - startT;
-    const phase = (cycle % S.breathCycleMs) / S.breathCycleMs;
-    let intensity;
-    if (phase < 0.4) intensity = phase / 0.4;
-    else if (phase < 0.5) intensity = 1.0;
-    else if (phase < 0.9) intensity = 1 - (phase - 0.5) / 0.4;
-    else intensity = 0.0;
-
-    core.style.transform = `translate(-50%,-50%) scale(${1 + intensity * 0.3})`;
-    ring.style.transform = `scale(${1 + intensity * 0.15})`;
-
-    // Wort-Anzeige
-    let w, isEin = false, isAus = false;
-    if (phase < 0.4) { w = 'EIN'; isEin = true; }
-    else if (phase < 0.5) { w = '·'; }
-    else if (phase < 0.9) { w = 'AUS'; isAus = true; }
-    else { w = '·'; }
-    word.textContent = w;
-    glyph.textContent = Math.round(intensity * 100);
-
-    if (isEin) {
-      ring.classList.add('active');
-      word.style.color = 'var(--o2)';
-    } else if (isAus) {
-      ring.classList.remove('active');
-      word.style.color = 'var(--h2o)';
-    } else {
-      ring.classList.remove('active');
-      word.style.color = 'var(--dim)';
-    }
-
-    // Runde vorbei?
-    const elapsed = cycle;
-    if (elapsed > S.breathCycleMs * 5) {
-      // 5 zyklen à 4 sek = 20 sek, zu lang. Nutze 5 Atemzüge.
-    }
-    // Nutze clickbasierte Zählung statt Zeit
-
-    requestAnimationFrame(tick);
-  }
-  requestAnimationFrame(tick);
-
-  wrap.style.cursor = 'pointer';
-  wrap.addEventListener('click', () => {
-    const cycle = performance.now() - startT;
-    const phase = (cycle % S.breathCycleMs) / S.breathCycleMs;
-    S.breathCount++;
-
-    // Richtig wenn phase zwischen 0.0 und 0.4 (EIN-Phase)
-    if (phase >= 0.0 && phase < 0.4) {
-      S.breathOk++;
-      word.textContent = '✓';
-      word.style.color = 'var(--o2)';
-    } else if (phase >= 0.9 || (phase >= 0.0 && phase < 0.4)) {
-      S.breathOk++;
-      word.textContent = '✓';
-      word.style.color = 'var(--o2)';
-    } else {
-      S.breathMiss++;
-      word.textContent = '✗';
-      word.style.color = 'var(--err)';
-    }
-    updateHud();
-
-    if (S.breathCount >= 8) {
-      wrap.style.pointerEvents = 'none';
-      setTimeout(() => kammer1End(), 900);
-    }
-  });
-}
-
-function kammer1End() {
-  const rate = S.breathOk / (S.breathOk + S.breathMiss);
-  let msg;
-  if (rate >= 0.85) msg = 'Du atmest ruhig. Der Kern öffnet sich.';
-  else if (rate >= 0.6) msg = 'Du atmest. Nicht perfekt. Aber du atmest.';
-  else msg = 'Du suchst den Takt. Er ist da. Nur still.';
-
-  sayWithButtons(
-    `<span class="hl">${msg}</span>
-     <br><br>Du hast ${S.breathOk} mal im richtigen Moment geatmet.
-     <br>${S.breathMiss} mal daneben. Das ist nicht schlimm.
-     <br><br>Atem verzeiht.`,
-    [{label:'Weiter', cls:'', onClick: kammer2}]
-  );
-}
-
-// ═══════════════════════════════════════════════════════════════
-// KAMMER 2 · WELCOME (Farben lesen)
-// ═══════════════════════════════════════════════════════════════
-const WELCOME_CASES = [
-  { scene: 'Eine Person sitzt mit geschlossenen Augen. Die Schultern sind hochgezogen. Sie antwortet nicht, wenn man sie anspricht. Atem: flach, schnell.',
-    correct: 'red', hint: 'Überforderung — kein Diskurs, wechseln.' },
-  { scene: 'Eine Person summt leise, malt Kreise auf ein Blatt. Die Augen sind halb geschlossen. Sie lächelt leicht.',
-    correct: 'blue', hint: 'Flow — Einklang. Nicht stören.' },
-  { scene: 'Eine Person sitzt still, Kopf leicht geneigt. Sie schaut zu Boden, wippt minimal mit dem Fuß. Reagiert auf Ansprache mit Verzögerung.',
-    correct: 'yellow', hint: 'Unsicher — Orientierung anbieten.' },
-  { scene: 'Eine Person steht am Fenster, atmet tief. Die Schultern sind unten. Sie sagt nichts. Nichts deutet auf Anspannung.',
-    correct: 'green', hint: 'Alles gut — nichts tun.' },
-  { scene: 'Eine Person hält die Hände vor dem Gesicht. Die Finger sind verkrampft. Der Atem ist flach, aber schnell.',
-    correct: 'red', hint: 'Reizüberflutung — sofort Abstand.' },
-  { scene: 'Eine Person zeichnet konzentriert an etwas. Zeitgefühl: verloren. Nicht ansprechbar, aber nicht weg.',
-    correct: 'blue', hint: 'Tiefer Flow — nicht unterbrechen.' },
-];
-
-let welcomeIdx = 0;
-function kammer2() {
-  S.kammer = 2;
-  kammerLbl.textContent = 'KAMMER 2 · WELCOME';
-  S.welcomeCorrect = 0; S.welcomeWrong = 0;
-  welcomeIdx = 0;
-  updateHud();
-  showWelcomeScene();
-}
-
-function showWelcomeScene() {
-  if (welcomeIdx >= WELCOME_CASES.length) {
-    kammer2End();
+function readSound(now){
+  if (!S.analyser || !S.humOn){
+    const breath = S.breathIntensity;
+    S.soundEnergy += (breath * 0.5 + 0.15 - S.soundEnergy) * 0.05;
+    S.soundBass = S.soundEnergy * 0.7;
+    S.soundMid = S.soundEnergy * 0.4;
+    S.soundHi = S.soundEnergy * 0.3;
+    S.soundPulse *= 0.94;
     return;
   }
-  const c = WELCOME_CASES[welcomeIdx];
-  stage.innerHTML = `
-    <div class="narr">Du begegnest einem <span class="hl">Menschen</span>.<br><br>
-    <span style="display:block;padding:16px;background:var(--bg2);border-left:3px solid var(--co2);border-radius:6px;margin-top:14px;text-align:left;font-style:normal;color:#e0d0c8;">
-      ${c.scene}
-    </span>
-    <br>Welche Farbe gibst du?
-    </div>
-    <div class="welcome-grid">
-      <div class="wcard green" data-c="green"><span class="dot">🟢</span><span class="nm">GRÜN</span></div>
-      <div class="wcard yellow" data-c="yellow"><span class="dot">🟡</span><span class="nm">GELB</span></div>
-      <div class="wcard red" data-c="red"><span class="dot">🔴</span><span class="nm">ROT</span></div>
-      <div class="wcard blue" data-c="blue"><span class="dot">🔵</span><span class="nm">BLAU</span></div>
-    </div>`;
+  S.analyser.getByteFrequencyData(S.spectrum);
+  const n = S.spectrum.length;
+  const bassBins = Math.floor(n * 0.12);
+  const midBins  = Math.floor(n * 0.55);
+  let total = 0, b = 0, m = 0, h = 0;
+  for (let i = 0; i < n; i++) total += S.spectrum[i];
+  for (let i = 0; i < bassBins; i++) b += S.spectrum[i];
+  for (let i = bassBins; i < midBins; i++) m += S.spectrum[i];
+  for (let i = midBins; i < n; i++) h += S.spectrum[i];
+  const rawE = total / n / 255;
+  const rawB = b / bassBins / 255;
+  const rawM = m / (midBins - bassBins) / 255;
+  const rawH = h / (n - midBins) / 255;
+  S.soundEnergy += (rawE - S.soundEnergy) * 0.15;
+  S.soundBass   += (rawB - S.soundBass)   * 0.22;
+  S.soundMid    += (rawM - S.soundMid)    * 0.18;
+  S.soundHi     += (rawH - S.soundHi)     * 0.20;
+  if (rawB > 0.45 && rawB > S.soundBass + 0.08 && now - S.lastBeat > 220){
+    S.soundPulse = 1; S.lastBeat = now;
+  }
+  S.soundPulse *= 0.92;
+}
 
-  stage.querySelectorAll('.wcard').forEach(card => {
-    card.addEventListener('click', () => {
-      stage.querySelectorAll('.wcard').forEach(c => c.style.pointerEvents = 'none');
-      card.classList.add('picked');
-      const picked = card.dataset.c;
-      if (picked === c.correct) {
-        S.welcomeCorrect++;
-        card.style.boxShadow = '0 0 30px rgba(124,224,168,0.8)';
-      } else {
-        S.welcomeWrong++;
-        card.style.boxShadow = '0 0 30px rgba(255,90,122,0.8)';
-        card.style.borderColor = 'var(--err)';
-      }
-      updateHud();
+/* ─── NARRATION ──────────────────────────────────────── */
+const LINES = [
+  { at: 0,  head: "AMIGA · 1985",  body: "Der Regen fällt als Code. Unter ihm atmet der Schaltkreis." },
+  { at: 9,  head: "GEIST",         body: "Ein Umhang aus Kabeln. Eine Klinge aus orangem Licht." },
+  { at: 20, head: "SPOREN",        body: "Die Pilze leuchten, weil sie erinnern. Nicht weil sie sehen." },
+  { at: 32, head: "WESEN",         body: "Zwischen den Schichten schweben sie. Sie kennen den Weg." },
+  { at: 46, head: "REFLEXION",     body: "Der Boden zeigt alles zurück. Auch das, was du vergessen wolltest." },
+  { at: 60, head: "SCHALTKREIS",   body: "Zwischen den Adern fließt etwas, das man Zukunft nennt." },
+  { at: 78, head: "GEIST-EXE",     body: "Der Regen kennt deinen Namen. Er hat ihn geschrieben." },
+];
+let currentLine = -1;
+const narrationEl = document.getElementById('narration');
+function updateNarration(){
+  const active = LINES.filter(l => S.t >= l.at).pop();
+  const idx = active ? LINES.indexOf(active) : -1;
+  if (idx !== currentLine){
+    currentLine = idx;
+    if (active){
+      narrationEl.innerHTML = `<b>◈ ${active.head}</b>${active.body}`;
+      narrationEl.classList.add('show');
+    } else narrationEl.classList.remove('show');
+  }
+}
+
+/* ─── HELPERS ────────────────────────────────────────── */
+function hexA(hex, a){
+  const h = hex.replace('#','');
+  const r = parseInt(h.substring(0,2),16);
+  const g = parseInt(h.substring(2,4),16);
+  const b = parseInt(h.substring(4,6),16);
+  return `rgba(${r},${g},${b},${a})`;
+}
+
+/* ─── MAIN RENDER ────────────────────────────────────── */
+function render(dt){
+  ctx.fillStyle = '#02040a';
+  ctx.fillRect(0, 0, W, H);
+
+  const pX = (S.mx - 0.5) * 40 * (0.5 + S.soundEnergy);
+  const pY = (S.my - 0.5) * 30 * (0.5 + S.soundEnergy);
+
+  // 1. Sterne
+  drawStars();
+
+  // 2. 3D Matrix
+  ctx.save();
+  ctx.translate(-pX * 0.25, -pY * 0.25);
+  drawMatrix3D(dt);
+  ctx.restore();
+
+  // 3. Back Mushrooms
+  ctx.save();
+  ctx.translate(-pX * 0.5, -pY * 0.5);
+  for (const m of mushrooms) if (m.layer < 0.7) { ctx.globalAlpha = 0.55; drawMushroom(m); ctx.globalAlpha = 1; }
+  ctx.restore();
+
+  // 4. Rays (God Rays)
+  drawRays();
+
+  // 5. Cables
+  ctx.save();
+  ctx.translate(-pX * 0.7, -pY * 0.7);
+  drawCables();
+  ctx.restore();
+
+  // 6. Ghost + Klinge
+  ctx.save();
+  ctx.translate(-pX * 0.85, -pY * 0.85);
+  drawGhost();
+  ctx.restore();
+
+  // 7. Zweiter Geist (Easter Egg)
+  ctx.save();
+  ctx.translate(-pX * 0.95, -pY * 0.95);
+  drawSecondGhost();
+  ctx.restore();
+
+  // 8. Mid Mushrooms
+  ctx.save();
+  ctx.translate(-pX * 1.0, -pY * 1.0);
+  for (const m of mushrooms) if (m.layer >= 0.7 && m.layer < 1.1) drawMushroom(m);
+  ctx.restore();
+
+  // 9. Fog
+  drawFog();
+
+  // 10. Wesen (Sporen + Fireflies)
+  drawCreatures();
+
+  // 11. Sparks
+  drawSparks();
+
+  // 12. Foreground Mushrooms
+  ctx.save();
+  ctx.translate(-pX * 1.4, -pY * 1.4);
+  for (const m of mushrooms) if (m.layer >= 1.1) drawMushroom(m);
+  ctx.restore();
+
+  // Vignette
+  drawVignette();
+
+  // Grain
+  drawGrain();
+
+  // Glitch
+  if (S.glitch > 0){
+    drawGlitch();
+    S.glitch *= 0.92;
+    if (S.glitch < 0.02) S.glitch = 0;
+  }
+
+  // Reflexion GANZ OBEN (vor dem finalen Bild)
+  drawReflection();
+}
+
+/* ─── MAIN LOOP ──────────────────────────────────────── */
+function loop(now){
+  const dt = Math.min(0.05, (now - S.last) / 1000);
+  S.last = now;
+  S.t += dt;
+  S.frame++;
+
+  S.fpsAcc += dt; S.fpsFrames++;
+  if (S.fpsAcc > 0.5){
+    S.fps = Math.round(S.fpsFrames / S.fpsAcc);
+    S.fpsAcc = 0; S.fpsFrames = 0;
+  }
+
+  S.mx += (S.tmx - S.mx) * 0.06;
+  S.my += (S.tmy - S.my) * 0.06;
+
+  if (S.breath) updateBreath();
+  updateSparks(dt);
+  updateCreatures(dt);
+  readSound(now);
+
+  if (Math.random() < 0.4 + S.soundEnergy * 1.2){
+    const colors = ['#ffb347','#ff8a2a','#39ff88','#5cf0ff','#b388ff','#ff3ea5'];
+    spawnSpark(Math.random()*W, Math.random()*H, colors[Math.floor(Math.random()*colors.length)], 1, 'spark');
+  }
+
+  render(dt);
+  drawTracker();
+  drawCopperBars();
+  updateNarration();
+  updateHUD();
+
+  requestAnimationFrame(loop);
+}
+
+/* ─── HUD ────────────────────────────────────────────── */
+const fpsLabel = document.getElementById('fpsLabel');
+const timeLabel = document.getElementById('timeLabel');
+const stateLed = document.getElementById('stateLed');
+const meterNeon = document.getElementById('meterNeon');
+const meterBass = document.getElementById('meterBass');
+const meterMid = document.getElementById('meterMid');
+const meterHi = document.getElementById('meterHi');
+let lastFpsUpdate = 0, lastTimeUpdate = 0;
+function updateHUD(){
+  if (performance.now() - lastFpsUpdate > 400){
+    lastFpsUpdate = performance.now();
+    fpsLabel.textContent = S.fps + ' FPS';
+  }
+  if (performance.now() - lastTimeUpdate > 250){
+    lastTimeUpdate = performance.now();
+    const total = Math.floor(S.t);
+    const m = String(Math.floor(total/60)).padStart(2,'0');
+    const s = String(total%60).padStart(2,'0');
+    const d = String(Math.floor((S.t*10)%10));
+    timeLabel.textContent = `00:${m}:${s}.${d}`;
+  }
+  stateLed.textContent = S.humOn ? 'GEIST · AKTIV' : 'SYSTEM WACHT';
+  meterNeon.style.width = Math.min(100, S.soundEnergy * 180).toFixed(0) + '%';
+  meterBass.style.width = Math.min(100, S.soundBass * 180).toFixed(0) + '%';
+  meterMid.style.width  = Math.min(100, S.soundMid * 180).toFixed(0) + '%';
+  meterHi.style.width   = Math.min(100, S.soundHi * 180).toFixed(0) + '%';
+}
+
+/* ─── KICKSTART BOOT ─────────────────────────────────── */
+function runKickstart(){
+  const bar = document.getElementById('ksBar');
+  const status = document.getElementById('ksStatus');
+  const phrases = [
+    'SUCHE SCHALTKREIS …',
+    'LADE GEIST-EXE …',
+    'INITIALISIERE MATRIX-REGEN …',
+    'VERBINDE KABELGEIST …',
+    'PFLANZE SPOREN …',
+    'AKTIVIERE LICHTKLINGE …',
+    'ÖFFNE SCHALTKREIS.',
+  ];
+  let p = 0;
+  const iv = setInterval(() => {
+    p += 2 + Math.random() * 4;
+    if (p >= 100){ p = 100; clearInterval(iv); }
+    bar.style.width = p + '%';
+    status.textContent = phrases[Math.min(phrases.length-1, Math.floor(p/100 * phrases.length))];
+    if (p >= 100){
       setTimeout(() => {
-        welcomeIdx++;
-        showWelcomeScene();
-      }, 1100);
-    });
-  });
+        document.getElementById('kickstart').classList.add('hidden');
+        document.getElementById('titlecard').classList.remove('hidden');
+      }, 600);
+    }
+  }, 90);
 }
 
-function kammer2End() {
-  const total = WELCOME_CASES.length;
-  let msg;
-  if (S.welcomeCorrect >= total - 1) msg = 'Du siehst. Wirklich. Die Menschen atmen anders, wenn sie gesehen werden.';
-  else if (S.welcomeCorrect >= total / 2) msg = 'Du siehst manchmal. Nicht immer. Das ist ehrlich.';
-  else msg = 'Du hast oft danebengegriffen. Das ist in Ordnung. Sehen ist eine Übung.';
-
-  sayWithButtons(
-    `<span class="hl">${msg}</span>
-     <br><br><span style="color:var(--dim);">${S.welcomeCorrect} von ${total} richtig gelesen.</span>
-     <br><br>Wichtig: Rot heißt nicht "böse". Rot heißt "ich kann jetzt nicht".
-     <br>Blau heißt nicht "weg". Blau heißt "ich bin da, ganz".`,
-    [{label:'Weiter', cls:'', onClick: kammer3}]
-  );
+/* ─── INIT ───────────────────────────────────────────── */
+function beginRuntime(){
+  initAudio();
+  if (S.audioCtx && S.audioCtx.state === 'suspended') S.audioCtx.resume();
+  startHum();
+  S.running = true;
+  document.getElementById('titlecard').classList.add('hidden');
+  S.last = performance.now();
 }
 
-// ═══════════════════════════════════════════════════════════════
-// KAMMER 3 · LÄUFER (Den Menschen finden)
-// ═══════════════════════════════════════════════════════════════
-function kammer3() {
-  S.kammer = 3;
-  kammerLbl.textContent = 'KAMMER 3 · LÄUFER';
-  S.userFound = 0; S.userMissed = 0;
-  updateHud();
+document.getElementById('enter').addEventListener('click', beginRuntime);
 
-  say(`Ein Block. <span class="hl">100 Slots.</span>
-    <br><br>99 davon sind Arbeit. <span class="hl-o2">Einer davon ist ein Mensch.</span>
-    <br><br>Klicke die Slots, um zu prüfen. Du hast 8 Klicks. Finde den Menschen.`,
-  );
-
-  setTimeout(() => showLaufGrid(), 2400);
-}
-
-function showLaufGrid() {
-  const userSlot = Math.floor(Math.random() * 90) + 5; // 5-94
-  stage.innerHTML = `
-    <div class="narr" style="margin-bottom:0;">
-      <span style="color:var(--dim);font-style:normal;font-size:12px;">
-        BLOCK 1000 · SLOTS 0–99 · 8 PRÜFUNGEN · Suche den <span style="color:var(--co2)">USER</span>
-      </span>
-    </div>
-    <div id="laufGrid"></div>`;
-  const grid = document.getElementById('laufGrid');
-  let clicks = 0;
-  const maxClicks = 8;
-  let found = false;
-
-  for (let i = 0; i < 100; i++) {
-    const cell = document.createElement('div');
-    cell.className = 'lcell';
-    cell.dataset.slot = i;
-    cell.textContent = i;
-    cell.addEventListener('click', () => {
-      if (cell.classList.contains('checked') || cell.classList.contains('miss')) return;
-      if (clicks >= maxClicks) return;
-      clicks++;
-
-      if (i === userSlot) {
-        cell.classList.add('user');
-        cell.textContent = '★';
-        found = true;
-        S.userFound++;
-        updateHud();
-        setTimeout(() => {
-          sayWithButtons(
-            `<span class="hl">👤 Du hast den Menschen gefunden.</span>
-             <br><br>Slot ${i}. Block 1000. Basis 10${String(i).padStart(2,'0')}.
-             <br><br>Manchmal sucht man an der falschen Stelle.
-             <br>Manchmal sieht man den Menschen nicht, weil er nicht das tut, was man erwartet.
-             <br><br>Er ist da. Immer. Man muss nur genau genug schauen.`,
-            [{label:'Weiter', cls:'', onClick: kammer4}]
-          );
-        }, 700);
-      } else {
-        cell.classList.add('miss');
-        cell.textContent = '·';
-        if (clicks >= maxClicks) {
-          // Nicht gefunden
-          S.userMissed++;
-          updateHud();
-          setTimeout(() => {
-            sayWithButtons(
-              `<span class="hl-err">Du hast den Menschen nicht gefunden.</span>
-               <br><br>Slot ${userSlot}. Er war da. Die ganze Zeit.
-               <br><br>Manchmal sucht man nach dem Falschen.
-               <br>Der Mensch sieht nicht aus, wie du erwartest.
-               <br><br>Aber er atmet. Zähl seine Atemzüge, nicht seine Antworten.`,
-              [{label:'Weiter', cls:'', onClick: kammer4}]
-            );
-          }, 600);
-        }
-      }
-    });
-    grid.appendChild(cell);
+document.getElementById('btnBreath').addEventListener('click', (e) => {
+  S.breath = !S.breath;
+  e.target.classList.toggle('on', S.breath);
+  e.target.textContent = `◈ ATEM · ${S.breath ? 'ON' : 'OFF'}`;
+});
+document.getElementById('btnSound').addEventListener('click', (e) => {
+  if (!S.audioCtx) initAudio();
+  if (S.audioCtx.state === 'suspended') S.audioCtx.resume();
+  if (S.humOn) stopHum(); else startHum();
+  e.target.classList.toggle('on', S.humOn);
+});
+document.getElementById('btnGlitch').addEventListener('click', () => {
+  S.glitch = 1;
+  for (let i = 0; i < 40; i++)
+    spawnSpark(W/2, H/2, ['#ff8a2a','#5cf0ff','#ff3ea5','#39ff88'][i%4], 1, 'spark');
+});
+document.getElementById('btnRain').addEventListener('click', (e) => {
+  S.rainOn = !S.rainOn;
+  e.target.classList.toggle('on', S.rainOn);
+  e.target.textContent = `道 MATRIX · ${S.rainOn ? 'ON' : 'OFF'}`;
+});
+document.getElementById('btnRays').addEventListener('click', (e) => {
+  S.raysOn = !S.raysOn;
+  e.target.classList.toggle('on', S.raysOn);
+  e.target.textContent = `☀ RAYS · ${S.raysOn ? 'ON' : 'OFF'}`;
+});
+document.getElementById('btnCreatures').addEventListener('click', (e) => {
+  S.creaturesOn = !S.creaturesOn;
+  e.target.classList.toggle('on', S.creaturesOn);
+  e.target.textContent = `✦ WESEN · ${S.creaturesOn ? 'ON' : 'OFF'}`;
+});
+document.getElementById('btnReflect').addEventListener('click', (e) => {
+  S.reflectOn = !S.reflectOn;
+  e.target.classList.toggle('on', S.reflectOn);
+  e.target.textContent = `◐ REFLEX · ${S.reflectOn ? 'ON' : 'OFF'}`;
+});
+document.getElementById('btnWarp').addEventListener('click', (e) => {
+  S.warp = !S.warp;
+  e.target.classList.toggle('on', S.warp);
+  if (S.warp){
+    for (let i = 0; i < 120; i++)
+      spawnSpark(Math.random()*W, Math.random()*H,
+        ['#ffb347','#5cf0ff','#ff3ea5','#39ff88','#b388ff'][i%5], 1, 'spark');
+    S.glitch = 0.8;
   }
-}
+});
+document.getElementById('btnFull').addEventListener('click', () => {
+  if (!document.fullscreenElement) document.documentElement.requestFullscreen?.();
+  else document.exitFullscreen?.();
+});
 
-// ═══════════════════════════════════════════════════════════════
-// KAMMER 4 · ZAM GATE (Der Pakt)
-// ═══════════════════════════════════════════════════════════════
-function kammer4() {
-  S.kammer = 4;
-  kammerLbl.textContent = 'KAMMER 4 · ZAM GATE';
-  updateHud();
-
-  stage.innerHTML = `
-    <div class="narr" style="margin-bottom:16px;">
-      Ein Tor erscheint. 門. Es ist nicht aus Materie.
-      Es ist aus dem, was <span class="hl">zwischen</span> den Dingen liegt.
-    </div>
-    <div class="pact">
-      <h4>◈ DAS TOR SPRICHT ◈</h4>
-      <p>Ich biete dir einen Pakt.</p>
-      <p>Du gibst mir dein <span style="color:var(--co2);font-style:normal;">Nicht-Atmen</span>.</p>
-      <p>Du gibst mir deine <span style="color:var(--co2);font-style:normal;">Angst zu fragen</span>.</p>
-      <p>Du gibst mir dein <span style="color:var(--co2);font-style:normal;">Zu-schnell-Urteilen</span>.</p>
-      <p>Und ich gebe dir:</p>
-      <p style="color:var(--o2);font-style:normal;letter-spacing:2px;">Die Fähigkeit zu bleiben.</p>
-      <div class="priceless">PREIS: NICHTS · GRUND: DAS UNIVERSUM IST GERECHT</div>
-    </div>
-    <div class="btnrow">
-      <button class="btn gold" data-a="yes">◈ Ja · ich nehme an</button>
-      <button class="btn" data-a="no">◇ Nein · ich brauche Zeit</button>
-      <button class="btn violet" data-a="ask">◉ Was kostet es wirklich?</button>
-    </div>`;
-
-  stage.querySelectorAll('.btn').forEach(b => {
-    b.addEventListener('click', () => {
-      const a = b.dataset.a;
-      S.pactChosen = a;
-      if (a === 'yes') {
-        sayWithButtons(
-          `<span class="hl">Der Pakt tritt in Kraft.</span>
-           <br><br>Nicht weil du unterschrieben hast.
-           <br>Sondern weil du <span style="color:var(--o2);font-style:normal;">geatmet hast</span>, während du gelesen hast.
-           <br><br>Der Pakt war nie ein Vertrag. Er war eine Erinnerung.
-           <br>Du bist schon drin.`,
-          [{label:'Weiter', cls:'', onClick: kammer5}]
-        );
-      } else if (a === 'no') {
-        sayWithButtons(
-          `<span class="hl-h2o">Das Tor nickt.</span>
-           <br><br>"Du brauchst Zeit. Gut. Wer Zeit braucht, ist wach."
-           <br><br>Das Tor wartet. Es ist geduldig.
-           <br>Es verschwindet nicht, nur weil du nicht sofort antwortest.
-           <br><br>Aber: Wer nie antwortet, bleibt draußen.`,
-          [{label:'Weiter', cls:'', onClick: kammer5}]
-        );
-      } else {
-        sayWithButtons(
-          `<span class="hl">Das Tor lächelt.</span>
-           <br><br>"Endlich fragt jemand."
-           <br><br>"Der Preis ist: dass du weitermachst. Immer weiter.
-           <br>Dass du morgens aufstehst. Dass du atemst. Dass du baust.
-           <br>Dass du nicht aufgibst."
-           <br><br>"Das ist alles. Klingt wenig. Ist alles."`,
-          [{label:'Weiter', cls:'', onClick: kammer5}]
-        );
-      }
-    });
-  });
-}
-
-// ═══════════════════════════════════════════════════════════════
-// KAMMER 5 · REAL.WORK (Balance halten)
-// ═══════════════════════════════════════════════════════════════
-function kammer5() {
-  S.kammer = 5;
-  kammerLbl.textContent = 'KAMMER 5 · REAL.WORK';
-  S.balanceOk = 0;
-  updateHud();
-
-  say(`Letzte Kammer. Der Kernel atmet.
-    <br><br>Vier Elemente. Halte sie in <span class="hl">Balance</span>.
-    <br><br><span class="hl-o2">O₂</span> kommt rein. <span class="hl">CO₂</span> geht raus.
-    <span class="hl-h2o">H₂O</span> fließt. <span class="hl-atom">ATOM</span> bleibt.
-    <br><br>Du hast 30 Sekunden. Ziel: Alle vier über 50% und unter 95%.`,
-  );
-
-  setTimeout(() => startBalance(), 2600);
-}
-
-function startBalance() {
-  const b = { o2: 0.5, co2: 0.5, h2o: 0.5, atom: 0.5 };
-  const startT = performance.now();
-  const DURATION = 30000;
-
-  function render() {
-    stage.innerHTML = `
-      <div class="narr" style="margin-bottom:0;font-style:normal;font-size:12px;color:var(--dim);">
-        Halte alle vier zwischen <span style="color:var(--o2);">50%</span> und <span style="color:var(--co2);">95%</span>
-        · <span id="timer">30</span>s
-      </div>
-      <div class="balance-grid">
-        <div class="bcol o2">
-          <div class="nm">O₂</div>
-          <div class="val">${Math.round(b.o2*100)}%</div>
-          <div class="bbar"><div class="f" style="width:${b.o2*100}%"></div></div>
-          <button class="btn-small" data-k="o2" data-d="1">+</button>
-          <button class="btn-small" data-k="o2" data-d="-1">−</button>
-        </div>
-        <div class="bcol co2">
-          <div class="nm">CO₂</div>
-          <div class="val">${Math.round(b.co2*100)}%</div>
-          <div class="bbar"><div class="f" style="width:${b.co2*100}%"></div></div>
-          <button class="btn-small" data-k="co2" data-d="1">+</button>
-          <button class="btn-small" data-k="co2" data-d="-1">−</button>
-        </div>
-        <div class="bcol h2o">
-          <div class="nm">H₂O</div>
-          <div class="val">${Math.round(b.h2o*100)}%</div>
-          <div class="bbar"><div class="f" style="width:${b.h2o*100}%"></div></div>
-          <button class="btn-small" data-k="h2o" data-d="1">+</button>
-          <button class="btn-small" data-k="h2o" data-d="-1">−</button>
-        </div>
-        <div class="bcol atom">
-          <div class="nm">ATOM</div>
-          <div class="val">${Math.round(b.atom*100)}%</div>
-          <div class="bbar"><div class="f" style="width:${b.atom*100}%"></div></div>
-          <button class="btn-small" data-k="atom" data-d="1">+</button>
-          <button class="btn-small" data-k="atom" data-d="-1">−</button>
-        </div>
-      </div>`;
-
-    stage.querySelectorAll('.btn-small').forEach(btn => {
-      btn.onclick = () => {
-        const k = btn.dataset.k;
-        const d = parseInt(btn.dataset.d, 10);
-        b[k] = Math.max(0, Math.min(1, b[k] + d * 0.06));
-      };
-    });
+window.addEventListener('mousemove', (e) => {
+  S.tmx = e.clientX / W; S.tmy = e.clientY / H;
+});
+window.addEventListener('touchmove', (e) => {
+  if (e.touches[0]){
+    S.tmx = e.touches[0].clientX / W;
+    S.tmy = e.touches[0].clientY / H;
   }
+}, { passive: true });
 
-  render();
-
-  const timer = setInterval(() => {
-    // störeinflüsse
-    b.o2 = Math.max(0, Math.min(1, b.o2 + (Math.random() - 0.5) * 0.06));
-    b.co2 = Math.max(0, Math.min(1, b.co2 + (Math.random() - 0.5) * 0.06));
-    b.h2o = Math.max(0, Math.min(1, b.h2o + (Math.random() - 0.5) * 0.06));
-    b.atom = Math.max(0, Math.min(1, b.atom + (Math.random() - 0.5) * 0.03));
-
-    const el = performance.now() - startT;
-    const remaining = Math.max(0, Math.ceil((DURATION - el) / 1000));
-    const timerEl = document.getElementById('timer');
-    if (timerEl) timerEl.textContent = remaining;
-
-    // Bewerte alle 1 sek
-    if (Math.floor(el / 1000) !== Math.floor((el - 500) / 1000)) {
-      const ok = b.o2 > 0.5 && b.o2 < 0.95 &&
-                 b.co2 > 0.5 && b.co2 < 0.95 &&
-                 b.h2o > 0.5 && b.h2o < 0.95 &&
-                 b.atom > 0.5 && b.atom < 0.95;
-      if (ok) { S.balanceOk++; updateHud(); }
+document.addEventListener('keydown', (e) => {
+  if (e.code === 'Space'){ e.preventDefault();
+    if (!S.running) beginRuntime();
+    else {
+      S.breath = !S.breath;
+      document.getElementById('btnBreath').classList.toggle('on', S.breath);
+      document.getElementById('btnBreath').textContent = `◈ ATEM · ${S.breath ? 'ON' : 'OFF'}`;
     }
+  }
+  if (e.key.toLowerCase() === 'f') document.getElementById('btnFull').click();
+  if (e.key.toLowerCase() === 'g') document.getElementById('btnGlitch').click();
+  if (e.key.toLowerCase() === 'm') document.getElementById('btnRain').click();
+  if (e.key.toLowerCase() === 's') document.getElementById('btnSound').click();
+  if (e.key.toLowerCase() === 'w') document.getElementById('btnWarp').click();
+  if (e.key.toLowerCase() === 'r') document.getElementById('btnRays').click();
+  if (e.key.toLowerCase() === 'c') document.getElementById('btnCreatures').click();
+  if (e.key.toLowerCase() === 'p') document.getElementById('btnReflect').click();
+});
 
-    render();
-    // Buttons nach render neu binden
-    stage.querySelectorAll('.btn-small').forEach(btn => {
-      btn.onclick = () => {
-        const k = btn.dataset.k;
-        const d = parseInt(btn.dataset.d, 10);
-        b[k] = Math.max(0, Math.min(1, b[k] + d * 0.06));
-      };
-    });
+/* ─── BOOT ───────────────────────────────────────────── */
+resize();
+requestAnimationFrame(loop);
+runKickstart();
 
-    if (el >= DURATION) {
-      clearInterval(timer);
-      kammer5End();
-    }
-  }, 100);
-}
+setInterval(() => {
+  if (S.running && Math.random() < 0.35) S.glitch = Math.max(S.glitch, 0.3);
+}, 6500);
 
-function kammer5End() {
-  const rate = S.balanceOk / 30;
-  let msg;
-  if (rate >= 0.85) msg = 'Du hast den Kernel gehalten. Er atmet stabil.';
-  else if (rate >= 0.5) msg = 'Du hast ihn oft gehalten. Oft auch nicht. Das ist das Leben.';
-  else msg = 'Der Kernel flackerte. Aber er ist nicht gestorben. Er braucht Zeit.';
-
-  sayWithButtons(
-    `<span class="hl">${msg}</span>
-     <br><br><span style="color:var(--dim);">${S.balanceOk} von 30 Sekunden in Balance.</span>`,
-    [{label:'⟹ Epilog', cls:'gold', onClick: epilog}]
-  );
-}
-
-// ═══════════════════════════════════════════════════════════════
-// EPILOG
-// ═══════════════════════════════════════════════════════════════
-function epilog() {
-  S.finished = true;
-  kammerLbl.textContent = 'EPILOG';
-
-  const bRate = S.breathOk / Math.max(1, S.breathOk + S.breathMiss);
-  const wRate = S.welcomeCorrect / WELCOME_CASES.length;
-  const lRate = S.userFound;
-  const zChoice = S.pactChosen;
-  const balRate = S.balanceOk / 30;
-
-  const total = Math.round(
-    (bRate * 20) + (wRate * 25) + (lRate * 20) + (balRate * 25) + (zChoice === 'yes' ? 10 : zChoice === 'ask' ? 10 : 5)
-  );
-
-  // Rang
-  let rang;
-  if (total >= 90) rang = '◈◈◈ ATMER';
-  else if (total >= 75) rang = '◈◈ SEHER';
-  else if (total >= 60) rang = '◈ SUCHENDER';
-  else if (total >= 40) rang = '◈ ANFÄNGER';
-  else rang = '◈ NEUGEBORENER';
-
-  const endMsg = total >= 75
-    ? 'Du atmest, du siehst, du findest, du hältst. Das ist alles.'
-    : total >= 50
-    ? 'Du atmest. Du versuchst. Du bist da. Das reicht für heute.'
-    : 'Du fängst an. Der Anfang ist immer langsam. Atme weiter.';
-
-  stage.innerHTML = `
-    <div class="epilog">
-      <h2>◈ ATMEN ◈</h2>
-      <p style="color:#c8e0d8;font-style:italic;line-height:2;">
-        Du bist durch fünf Kammern gegangen.<br>
-        Jede lehrt dich eines:<br>
-        <span style="color:var(--o2);font-style:normal;">ATEM</span> ist Rhythmus.<br>
-        <span style="color:var(--co2);font-style:normal;">WELCOME</span> ist Sehen.<br>
-        <span style="color:var(--h2o);font-style:normal;">LÄUFER</span> ist Geduld.<br>
-        <span style="color:var(--atom);font-style:normal;">ZAM</span> ist Mut.<br>
-        <span style="color:var(--mana);font-style:normal;">REAL.WORK</span> ist Balance.
-      </p>
-      <div style="margin-top:24px;">
-        <span class="score">ATMUNG <b>${S.breathOk}/${S.breathOk + S.breathMiss}</b></span>
-        <span class="score">SEHEN <b>${S.welcomeCorrect}/${WELCOME_CASES.length}</b></span>
-        <span class="score">MENSCH <b>${S.userFound}/1</b></span>
-        <span class="score">PAKT <b>${zChoice === 'yes' ? 'JA' : zChoice === 'ask' ? 'FRAGE' : 'WARTEN'}</b></span>
-        <span class="score">BALANCE <b>${S.balanceOk}/30</b></span>
-      </div>
-      <div style="margin-top:20px;">
-        <span class="score" style="border-color:var(--co2);color:var(--co2);padding:10px 24px;font-size:16px;">
-          <b style="color:var(--co2);font-size:18px;">${total}</b> / 100
-        </span>
-      </div>
-      <div class="final">${rang}</div>
-      <p style="margin-top:30px;font-style:italic;color:#a0b8c8;font-size:14px;">
-        ${endMsg}
-      </p>
-      <p style="margin-top:40px;font-family:var(--serif);letter-spacing:4px;color:var(--o2);font-size:12px;">
-        ((((WIEIMMER))))<br>
-        ((((IKI1UC))))<br>
-        HI HI HI 👻
-      </p>
-      <p style="margin-top:30px;font-size:11px;color:var(--dim);font-style:italic;">
-        „ATEM und ATOM verneinen sich nicht. Sie bedingen sich."<br>
-        — das erste Axiom
-      </p>
-      <div style="margin-top:30px;">
-        <button class="btn gold" onclick="location.reload()">◈ Noch einmal atmen</button>
-      </div>
-    </div>`;
-
-  // Speichere den Score (falls verfügbar)
-  try {
-    const best = parseInt(localStorage.getItem('atem_best') || '0', 10);
-    if (total > best) {
-      localStorage.setItem('atem_best', String(total));
-    }
-  } catch(_) {}
-}
-
-// ═══════════════════════════════════════════════════════════════
-// START
-// ═══════════════════════════════════════════════════════════════
-boot();
-
+})();
 </script>
 </body>
 </html>
