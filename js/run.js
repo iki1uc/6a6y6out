@@ -7,4 +7,3 @@ async function loadData() {
   ]);
   S.data = { axioms, welcome, run, room };
 }
-
