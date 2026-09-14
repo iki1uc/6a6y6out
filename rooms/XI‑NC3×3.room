@@ -1,1 +1,13 @@
+ROOM: XI-NC3x3
+SIZE: 3x3
+
+GRID:
+0 1 0
+1 2 1
+0 1 0
+
+META:
+CENTER: 1,1
+TYPE: XI
+STATE: active
 
