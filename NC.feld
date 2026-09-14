@@ -1,8 +1,12 @@
-LÄUFER‑6
-1. XyX          (links/rechts)
-2. AIR          (oben)
-3. AIV          (unten)
-4. NC.in        (Eingang)
-5. NC.out       (Ausgang)
-6. NC.feld      (TRANSWARB‑Beweisfeld)
+FELD: NC
+VERSION: 1.0
 
+TILES:
+0 = empty
+1 = pulse
+2 = core
+
+RULES:
+- core erzeugt pulse in orthogonalen Richtungen
+- pulse fällt nach 3 ticks zurück zu empty
+- Räume dürfen nicht diagonal verbinden
