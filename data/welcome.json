@@ -1,1 +1,6 @@
-
+[
+  {"scene":"Person mit geschlossenen Augen.","correct":"red"},
+  {"scene":"Person malt Kreise.","correct":"blue"},
+  {"scene":"Person schaut zu Boden.","correct":"yellow"},
+  {"scene":"Person steht am Fenster.","correct":"green"}
+]
