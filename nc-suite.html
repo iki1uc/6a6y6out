@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>WURZEL ×3 · NC.SUITE</title>
+<style>
+:root{--bg:#030507;--s:#0a1018;--l:#1b2a3a;--t:#d7e2ee;--m:#7d90a4;
+      --gold:#ffd24a;--cy:#22e6ff;--vi:#a78bfa;--g:#3dffa0;--r:#ff5a4d;
+      --home:#4da3ff;--ort:#f0b429;--pruef:#e5534b}
+*{box-sizing:border-box;margin:0;padding:0;font-family:Consolas,monospace}
+body{background:var(--bg);color:var(--t);max-width:1200px;margin:auto;padding:14px}
+
+/* NC HEADER */
+.kopf-zeile{position:sticky;top:0;z-index:9999;background:rgba(5,5,7,.95);
+  border-bottom:2px solid var(--gold);margin-bottom:14px}
+.kopf-inner{display:flex;justify-content:space-between;align-items:center;
+  gap:12px;padding:10px;flex-wrap:wrap}
+.kopf-brand{color:var(--gold);font-weight:900;letter-spacing:.08em}
+.kopf-nav{display:flex;gap:6px;flex-wrap:wrap}
+.kopf-nav a{color:var(--cy);text-decoration:none;border:1px solid var(--l);
+  padding:4px 10px;font-size:12px;transition:.15s}
+.kopf-nav a:hover{border-color:var(--gold)}
+.kopf-nav a.active{background:var(--gold);color:#000;font-weight:700}
+.kopf-state{color:var(--g);border:1px solid var(--g);padding:4px 8px;font-size:11px;
+  letter-spacing:.1em;transition:.2s}
+.kopf-state.warn{color:var(--gold);border-color:var(--gold)}
+.kopf-state.bad{color:var(--r);border-color:var(--r)}
+.mobile-nav{display:none;width:100%;padding:0 10px 10px}
+#mobile-toggle{width:100%;background:#050507;color:var(--gold);border:1px solid var(--gold);
+  padding:10px;font-weight:700;cursor:pointer;font-family:inherit}
+#mobile-panel{display:none;margin-top:4px;border:1px solid var(--l)}
+#mobile-panel.open{display:grid}
+#mobile-panel a{text-decoration:none;color:var(--cy);padding:10px;
+  border-bottom:1px solid var(--l);font-size:13px}
+#mobile-panel a.active{background:var(--gold);color:#000;font-weight:700}
+
+/* APP */
+main{display:block}
+h1{color:var(--gold);margin-bottom:8px;font-size:24px}
+.sub{color:var(--m);margin-bottom:18px;line-height:1.5;font-size:13px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.box{background:var(--s);border:1px solid var(--l);padding:16px;margin-bottom:12px}
+.box h2{color:var(--cy);font-size:12px;margin-bottom:12px;letter-spacing:.1em}
+.rooms{display:grid;grid-template-columns:repeat(9,1fr);gap:4px}
+.rooms button{padding:10px 0;border:1px solid var(--l);background:#101a26;
+  color:var(--t);cursor:pointer;font-size:13px;font-family:inherit;transition:.12s}
+.rooms button:hover{border-color:var(--gold)}
+.rooms button.on{background:var(--gold);color:#000;font-weight:700}
+#room-node-info{margin-top:12px;border:1px solid var(--g);background:rgba(61,255,160,.08);
+  color:var(--g);padding:10px;font-size:13px;min-height:40px;display:flex;align-items:center}
+#rinfo{margin-top:8px;color:var(--m);font-size:12px}
+.core{margin-bottom:16px}
+.core-val{font-size:32px;font-weight:700;color:var(--gold);line-height:1.1}
+.core-sub{color:var(--m);font-size:13px;margin-top:4px;line-height:1.5}
+.live-panel{border-top:1px solid var(--l);padding-top:12px;margin-top:12px}
+.live-panel h3{font-size:11px;color:var(--m);letter-spacing:.1em;margin-bottom:8px}
+.wurzeln-live{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.w-box{background:#060b11;border:1px solid var(--l);padding:10px 8px;border-radius:4px;text-align:center}
+.w-box .lbl{font-size:10px;color:var(--m);letter-spacing:.1em}
+.w-box .val{font-size:14px;font-weight:700;margin-top:2px}
+.w-box.home .val{color:var(--home)}
+.w-box.ort .val{color:var(--ort)}
+.w-box.pruef .val{color:var(--pruef)}
+footer{margin-top:30px;border-top:1px solid var(--l);padding-top:12px;
+  color:#6e8091;font-size:11px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px}
+@media(max-width:760px){
+  .kopf-nav{display:none}.mobile-nav{display:block}
+  .rooms{grid-template-columns:repeat(3,1fr)}.grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<header class="kopf-zeile">
+  <div class="kopf-inner">
+    <div class="kopf-brand">● NC.SUITE</div>
+    <nav class="kopf-nav">
+      <a href="./index.html">INDEX</a>
+      <a href="./home.html">HOME</a>
+      <a href="./ort.html">ORT</a>
+      <a href="./alles.html">ALLES</a>
+      <a href="./nc-suite.html" class="active">KERN</a>
+    </nav>
+    <div class="kopf-state" id="brain-state">● BRAIN.EYE.OPEN</div>
+  </div>
+  <div class="mobile-nav">
+    <button id="mobile-toggle" type="button">☰ NODE : KERN</button>
+    <nav id="mobile-panel">
+      <a href="./index.html">INDEX</a>
+      <a href="./home.html">HOME</a>
+      <a href="./ort.html">ORT</a>
+      <a href="./alles.html">ALLES</a>
+      <a href="./nc-suite.html" class="active">KERN</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <section class="page-header">
+    <h1>WURZEL ×3 · 729 → 81 → 9 → 3</h1>
+    <p class="sub">81 Slots → 9 Räume → 3 Kernzustände. Verbunden mit wurzel-state.js.</p>
+  </section>
+
+  <section class="grid">
+    <article class="box">
+      <h2>9 Räume</h2>
+      <div class="rooms" id="rooms" aria-label="Raumauswahl"></div>
+      <div id="room-node-info"></div>
+      <p id="rinfo"></p>
+    </article>
+
+    <article class="box">
+      <h2>Kernzustände</h2>
+      <div class="core">
+        <div class="core-val" id="core-val">9</div>
+        <div class="core-sub" id="core-sub">EVIG</div>
+      </div>
+      <section class="live-panel">
+        <h3>LIVE WURZELN</h3>
+        <div class="wurzeln-live" id="wurzeln-live"></div>
+      </section>
+    </article>
+  </section>
+</main>
+
+<footer>
+  <span>© NC.SUITE · WURZEL ×3 · ACTIVE NODE SYSTEM</span>
+  <span style="color:var(--cy);opacity:.7">state sync via wurzel-state.js</span>
+</footer>
+
+<script src="wurzel-state.js"></script>
+<script>
+const ROOMS=[
+  ['111','BIOS'], ['222','VERBUND'], ['333','RECALL'],
+  ['444','PEAK'], ['555','ABWEHR'],  ['666','ENERGIE'],
+  ['777','CO2'],  ['888','ATOM'],    ['999','BENCH']
+];
+const TRI=[
+  ['9','EVIG','Zustand, nicht Zähler'],
+  ['99','EDIT TOR','CALL · RECALL · ALLCALL'],
+  ['999','NUTZ SYSTEM','BENCH – alle 9 auf einer Bank']
+];
+
+let activeRoom=0;
+
+const current=(location.pathname.split("/").pop()||"index").replace(".html","").toLowerCase();
+document.querySelectorAll('.kopf-nav a, #mobile-panel a').forEach(a=>{
+  const target=a.getAttribute('href').replace('./','').replace('.html','').toLowerCase();
+  if(current===target||(current===''&&target==='index')) a.classList.add('active');
+});
+const mobileToggle=document.getElementById('mobile-toggle');
+const mobilePanel=document.getElementById('mobile-panel');
+mobileToggle.textContent='☰ NODE : '+(current==='index'?'INDEX':current.toUpperCase());
+mobileToggle.onclick=()=>mobilePanel.classList.toggle('open');
+
+document.getElementById('rooms').innerHTML=ROOMS.map((r,i)=>
+  `<button data-room="${i}" type="button">${r[0]}</button>`
+).join('');
+
+function draw(){
+  const Z=window.WURZEL_STATE?WURZEL_STATE.zustand():{HOME:'OPEN',ORT:'GEWÄHLT',PRUEF:'RICHTIG'};
+  const tmp=window.WURZEL_STATE?WURZEL_STATE.tmp():531;
+  const rm=ROOMS[activeRoom];
+  const tri=TRI[Math.floor(activeRoom/3)];
+
+  document.querySelectorAll('[data-room]').forEach((b,i)=>{
+    b.className=i===activeRoom?'on':'';
+  });
+
+  document.getElementById('room-node-info').innerHTML=
+    '◉ ACTIVE NODE '+rm[0]+' // '+rm[1]+' → '+tri[0]+' '+tri[1];
+
+  const slot=activeRoom*9;
+  const rar=81-(slot%9)*9;
+  const wahrheit=(tmp*rar/729).toFixed(2);
+  document.getElementById('rinfo').textContent=
+    'Raum '+rm[0]+' '+rm[1]+' · TMP '+tmp+' · WAHRHEIT '+wahrheit;
+
+  document.getElementById('core-val').textContent=tri[0];
+  document.getElementById('core-sub').textContent=tri[1]+' — '+tri[2];
+
+  document.getElementById('wurzeln-live').innerHTML=['HOME','ORT','PRUEF'].map(w=>{
+    return `<div class="w-box ${w.toLowerCase()}">
+      <div class="lbl">${w}</div>
+      <div class="val">${Z[w]}</div>
+    </div>`;
+  }).join('');
+
+  const hs=document.getElementById('brain-state');
+  if(Z.PRUEF==='FEHLER'||Z.HOME==='CLOSED'||Z.ORT==='LEER'){
+    hs.textContent='● BRAIN.EYE.CLOSED'; hs.className='kopf-state bad';
+  } else if(Z.PRUEF==='UNGEPRUEFT'||Z.HOME==='OPEN'||Z.ORT==='GEWÄHLT'){
+    hs.textContent='● BRAIN.EYE.WAIT';   hs.className='kopf-state warn';
+  } else { hs.textContent='● BRAIN.EYE.OPEN'; hs.className='kopf-state'; }
+}
+
+document.addEventListener('click', e=>{
+  const b=e.target.closest('[data-room]');
+  if(!b) return;
+  activeRoom=+b.dataset.room;
+  if(window.WURZEL_STATE){
+    const firstSlotOfRoom=activeRoom*9;
+    WURZEL_STATE._S.activeSlot=firstSlotOfRoom;
+    WURZEL_STATE.slotSet(firstSlotOfRoom,true);
+  }
+  draw();
+});
+
+if(window.WURZEL_STATE){ window.WURZEL_STATE.onRemote=draw; }
+draw();
+</script>
+</body>
+</html>

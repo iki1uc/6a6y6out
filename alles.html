@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ALLES · 9 Blöcke · WURZEL OS</title>
+<style>
+:root{--bg:#030507;--s:#0a1018;--l:#1b2a3a;--t:#d7e2ee;--m:#7d90a4;
+      --gold:#ffd24a;--cy:#22e6ff;--vi:#a78bfa;--g:#3dffa0;--r:#ff5a4d;
+      --home:#4da3ff;--ort:#f0b429;--pruef:#e5534b;
+      --ok:#3fb950;--warn:#d29922;--bad:#f85149;--parity:#8b5cf6}
+*{box-sizing:border-box;margin:0;padding:0;font-family:Consolas,monospace}
+body{background:var(--bg);color:var(--t);max-width:1200px;margin:auto;padding:14px}
+
+/* NC HEADER */
+.kopf-zeile{position:sticky;top:0;z-index:9999;background:rgba(5,5,7,.95);
+  border-bottom:2px solid var(--gold);margin-bottom:14px}
+.kopf-inner{display:flex;justify-content:space-between;align-items:center;
+  gap:12px;padding:10px;flex-wrap:wrap}
+.kopf-brand{color:var(--gold);font-weight:900;letter-spacing:.08em}
+.kopf-nav{display:flex;gap:6px;flex-wrap:wrap}
+.kopf-nav a{color:var(--cy);text-decoration:none;border:1px solid var(--l);
+  padding:4px 10px;font-size:12px;transition:.15s}
+.kopf-nav a:hover{border-color:var(--gold)}
+.kopf-nav a.active{background:var(--gold);color:#000;font-weight:700}
+.kopf-state{color:var(--g);border:1px solid var(--g);padding:4px 8px;font-size:11px;
+  letter-spacing:.1em;transition:.2s}
+.kopf-state.warn{color:var(--gold);border-color:var(--gold)}
+.kopf-state.bad{color:var(--r);border-color:var(--r)}
+.mobile-nav{display:none;width:100%;padding:0 10px 10px}
+#mobile-toggle{width:100%;background:#050507;color:var(--gold);border:1px solid var(--gold);
+  padding:10px;font-weight:700;cursor:pointer;font-family:inherit}
+#mobile-panel{display:none;margin-top:4px;border:1px solid var(--l)}
+#mobile-panel.open{display:grid}
+#mobile-panel a{text-decoration:none;color:var(--cy);padding:10px;
+  border-bottom:1px solid var(--l);font-size:13px}
+#mobile-panel a.active{background:var(--gold);color:#000;font-weight:700}
+
+/* APP */
+main{display:block}
+h1{color:var(--gold);margin-bottom:6px;font-size:26px}
+.sub{color:var(--m);margin-bottom:18px;font-size:12px}
+.box{background:var(--s);border:1px solid var(--l);padding:14px;margin-bottom:14px}
+.box h2{color:var(--cy);font-size:12px;margin-bottom:10px;letter-spacing:.1em}
+.strip{display:grid;grid-template-columns:repeat(3,1fr) 1fr 1fr;gap:10px;margin-bottom:14px}
+.pill{background:var(--s);border:1px solid var(--l);border-radius:6px;padding:10px 12px;font-size:11px}
+.pill .lbl{color:var(--m);letter-spacing:.15em;text-transform:uppercase;font-size:9px;margin-bottom:3px}
+.pill .val{font-size:13px;font-weight:600}
+.pill.home .val{color:var(--home)}
+.pill.ort .val{color:var(--ort)}
+.pill.pruef .val{color:var(--pruef)}
+.pill.ampel .val.on{color:var(--ok)}
+.pill.ampel .val.warn{color:var(--warn)}
+.pill.ampel .val.bad{color:var(--bad)}
+.grid9{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px}
+.block{background:var(--s);border:1px solid var(--l);border-radius:8px;
+  padding:10px;position:relative;overflow:hidden}
+.block::before{content:"";position:absolute;inset:0 auto 0 0;width:3px}
+.block.w0::before,.block.w1::before,.block.w2::before{background:var(--home)}
+.block.w3::before,.block.w4::before,.block.w5::before{background:var(--ort)}
+.block.w6::before,.block.w7::before,.block.w8::before{background:var(--pruef)}
+.bh{display:flex;justify-content:space-between;font-size:10px;color:var(--m);
+  letter-spacing:.1em;margin-bottom:8px}
+.bh .wn{font-weight:700}
+.block.w0 .wn,.block.w1 .wn,.block.w2 .wn{color:var(--home)}
+.block.w3 .wn,.block.w4 .wn,.block.w5 .wn{color:var(--ort)}
+.block.w6 .wn,.block.w7 .wn,.block.w8 .wn{color:var(--pruef)}
+.slots{display:grid;grid-template-columns:repeat(9,1fr);gap:2px}
+.slot{aspect-ratio:1;border-radius:2px;background:#090c12;border:1px solid #161d26;
+  cursor:pointer;transition:.1s;position:relative}
+.slot:hover{border-color:#2d3644;transform:scale(1.1)}
+.slot.on{background:#1f6feb;border-color:#388bfd;box-shadow:0 0 8px rgba(31,111,235,.4)}
+.slot.parity{background:#1a1326;border-color:#2d1f4a}
+.slot.parity.on{background:#6d28d9;border-color:#8b5cf6;box-shadow:0 0 8px rgba(139,92,246,.4)}
+.slot.parity::after{content:"P";position:absolute;inset:0;display:flex;
+  align-items:center;justify-content:center;font-size:7px;color:#8b5cf6;font-weight:700}
+.slot.parity.on::after{color:#fff}
+.meta{display:flex;justify-content:space-between;font-size:9px;color:var(--m);
+  margin-top:8px;letter-spacing:.05em}
+.meta .id{color:var(--parity)}
+.bottom{display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:12px}
+.tmpbar{height:8px;background:#090c12;border-radius:4px;overflow:hidden;
+  margin:8px 0;border:1px solid var(--l)}
+.tmpfill{height:100%;background:linear-gradient(90deg,var(--home),var(--ort),var(--pruef));width:0%;transition:.3s}
+.kv{display:flex;justify-content:space-between;font-size:11px;padding:2px 0}
+.kv span:first-child{color:var(--m)}
+.act{background:#090c12;border:1px solid var(--l);border-radius:6px;color:var(--t);
+  padding:6px 12px;cursor:pointer;font:inherit;font-size:11px;width:100%;transition:.15s}
+.act:hover{border-color:var(--gold);color:var(--gold)}
+.bus{font-size:11px;min-height:40px}
+.peer{display:flex;justify-content:space-between;padding:3px 0}
+.peer .on{color:var(--ok)}.peer .off{color:var(--m)}
+.nav{display:flex;gap:10px;margin-top:16px;justify-content:center;flex-wrap:wrap}
+.btn{background:var(--s);border:1px solid var(--l);border-radius:7px;
+  padding:10px 18px;color:var(--t);text-decoration:none;font:inherit;font-size:11px;
+  cursor:pointer;transition:.15s}
+.btn:hover{border-color:var(--gold);color:var(--gold)}
+footer{margin-top:30px;border-top:1px solid var(--l);padding-top:10px;
+  color:#6e8091;font-size:11px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px}
+@media(max-width:900px){.bottom{grid-template-columns:1fr}}
+@media(max-width:760px){.kopf-nav{display:none}.mobile-nav{display:block}}
+</style>
+</head>
+<body>
+
+<header class="kopf-zeile">
+  <div class="kopf-inner">
+    <div class="kopf-brand">● NC.SUITE</div>
+    <nav class="kopf-nav">
+      <a href="./index.html">INDEX</a>
+      <a href="./home.html">HOME</a>
+      <a href="./ort.html">ORT</a>
+      <a href="./alles.html" class="active">ALLES</a>
+      <a href="./nc-suite.html">KERN</a>
+    </nav>
+    <div class="kopf-state" id="brain-state">● BRAIN.EYE.OPEN</div>
+  </div>
+  <div class="mobile-nav">
+    <button id="mobile-toggle" type="button">☰ NODE : ALLES</button>
+    <nav id="mobile-panel">
+      <a href="./index.html">INDEX</a>
+      <a href="./home.html">HOME</a>
+      <a href="./ort.html">ORT</a>
+      <a href="./alles.html" class="active">ALLES</a>
+      <a href="./nc-suite.html">KERN</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <section class="page-header">
+    <h1>ALLES · 9 Blöcke · 81 Slots</h1>
+    <p class="sub">SCSI RAID 5 · 8 Daten + 1 Parität pro Stripe · TMP in 9 Schritten</p>
+  </section>
+
+  <section class="strip" id="strip"></section>
+  <section class="grid9" id="grid9"></section>
+
+  <section class="bottom">
+    <article class="box">
+      <h2>TMP · 9 Schritte</h2>
+      <div class="tmpbar"><div class="tmpfill" id="tmpfill"></div></div>
+      <div class="kv"><span>TMP</span><span id="tmpval">0</span></div>
+      <div class="kv"><span>Stufe</span><span id="tmpstep">1 / 9</span></div>
+      <button class="act" style="margin-top:8px" onclick="WURZEL_STATE.tmpStep();render()">+81 atmen</button>
+    </article>
+    <article class="box">
+      <h2>Bus · Peers</h2>
+      <div class="bus" id="bus"></div>
+    </article>
+    <article class="box">
+      <h2>Reduktion</h2>
+      <div style="font-size:10px;color:var(--m);line-height:1.9">
+        6561 → 729 → 81 → <b>9</b> → <b>3</b><br>
+        81 Slots × 9 TMP = 729<br>
+        9 Blöcke × 9 = 81<br>
+        3 Wurzeln × 3 = 9
+      </div>
+    </article>
+  </section>
+
+  <nav class="nav">
+    <a href="./index.html" class="btn">← Index</a>
+    <a href="./home.html" class="btn">home</a>
+    <a href="./ort.html" class="btn">ort</a>
+    <a href="./nc-suite.html" class="btn">kern</a>
+  </nav>
+</main>
+
+<footer>
+  <span>© NC.SUITE · WURZEL ×3 · ALLES · SCSI RAID 5</span>
+  <span style="color:var(--cy);opacity:.7">state sync via wurzel-state.js</span>
+</footer>
+
+<script src="wurzel-state.js"></script>
+<script>
+function isParity(s){ return Math.floor(s/9)===(s%9); }
+function ampel(Z){
+  const s=[Z.HOME,Z.ORT,Z.PRUEF];
+  const f=s.filter(x=>['CLOSED','LEER','FEHLER','UNGEPRUEFT'].includes(x)).length;
+  const w=s.filter(x=>['OPEN','GEWÄHLT'].includes(x)).length;
+  if(f>=2) return 'FAELLT';
+  if(f>=1||w>=2) return 'WACKELT';
+  return 'STEHT';
+}
+function render(){
+  const Z=WURZEL_STATE.zustand();
+  const B=WURZEL_STATE.bloecke();
+  const tmp=WURZEL_STATE.tmp();
+  const S=WURZEL_STATE._S;
+  const amp=ampel(Z);
+
+  document.getElementById('strip').innerHTML=
+    ['HOME','ORT','PRUEF'].map(w=>
+      `<div class="pill ${w.toLowerCase()}">
+         <div class="lbl">${w}</div><div class="val">${Z[w]}</div>
+       </div>`
+    ).join('')+
+    `<div class="pill"><div class="lbl">TMP</div><div class="val">${tmp}</div></div>`+
+    `<div class="pill ampel"><div class="lbl">GESAMT</div>
+       <div class="val ${amp==='STEHT'?'on':amp==='WACKELT'?'warn':'bad'}">${amp}</div>
+     </div>`;
+
+  document.getElementById('grid9').innerHTML=B.map(b=>{
+    const slotsHtml=b.slots.map(s=>{
+      const on=WURZEL_STATE.slotGet(s), par=isParity(s);
+      return `<div class="slot ${par?'parity':''} ${on?'on':''}"
+        title="Slot ${s} · RAR ${WURZEL_STATE.rarOf(s)} · ${par?'PARITY':'DATA'}"
+        onclick="WURZEL_STATE.slotSet(${s},!${on});render()"></div>`;
+    }).join('');
+    const parityOn=b.slots.filter(s=>isParity(s)&&WURZEL_STATE.slotGet(s)).length;
+    const dataCount=b.dateien-parityOn;
+    return `<div class="block w${b.idx}">
+      <div class="bh"><span class="wn">${b.wurzel}</span><span>SCSI ${b.idx}</span></div>
+      <div class="slots">${slotsHtml}</div>
+      <div class="meta">
+        <span>RAR ${b.rarVon}..${b.rarVon-18}</span>
+        <span>${dataCount}/8D · <span class="id">1P</span></span>
+      </div>
+    </div>`;
+  }).join('');
+
+  const step=tmp===0?1:Math.ceil(tmp/81);
+  document.getElementById('tmpval').textContent=tmp;
+  document.getElementById('tmpstep').textContent=step+' / 9';
+  document.getElementById('tmpfill').style.width=(tmp/729*100)+'%';
+
+  const peers=Object.entries(S.peers);
+  document.getElementById('bus').innerHTML=peers.length
+    ?peers.map(([k,v])=>`<div class="peer"><span>${k}</span>
+       <span class="${v==='online'?'on':'off'}">${v}</span></div>`).join('')
+    :'<div class="peer"><span style="color:var(--m)">keine Peers</span></div>';
+
+  const hs=document.getElementById('brain-state');
+  if(Z.PRUEF==='FEHLER'||Z.HOME==='CLOSED'||Z.ORT==='LEER'){
+    hs.textContent='● BRAIN.EYE.CLOSED'; hs.className='kopf-state bad';
+  } else if(Z.PRUEF==='UNGEPRUEFT'||Z.HOME==='OPEN'||Z.ORT==='GEWÄHLT'){
+    hs.textContent='● BRAIN.EYE.WAIT';   hs.className='kopf-state warn';
+  } else { hs.textContent='● BRAIN.EYE.OPEN'; hs.className='kopf-state'; }
+}
+if(window.WURZEL_STATE){ window.WURZEL_STATE.onRemote=render; }
+render(); setInterval(render,1500);
+</script>
+</body>
+</html>
